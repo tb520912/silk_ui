@@ -1,0 +1,36 @@
+{
+  "color": [
+    {
+      "name": "white",
+      "value": "#ffffff"
+    },
+    {
+      "name": "base_font_color9",
+      "value": "#999999"
+    },
+    {
+      "name": "base_color",
+      "value": "#0581ce"
+    },
+    {
+      "name": "base_font_color6",
+      "value": "#666666"
+    },
+    {
+      "name": "base_font_color3",
+      "value": "#333333"
+    },
+    {
+      "name": "bgc_f6",
+      "value": "#f6f6f6"
+    },
+    {
+      "name": "overlay_bg",
+      "value": "#B3000000"
+    },
+    {
+      "name": "border_color",
+      "value": "#ebedf0"
+    }
+  ]
+}
