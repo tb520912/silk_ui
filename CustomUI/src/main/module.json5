@@ -1,6 +1,6 @@
 {
   "module": {
-    "name": "UIComponent",
+    "name": "CustomUI",
     "type": "har",
     "deviceTypes": [
       "default",
