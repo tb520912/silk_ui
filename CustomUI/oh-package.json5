@@ -1,11 +1,10 @@
 {
   "name": "@tb/custom_ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Please describe the basic information.",
   "main": "Index.ets",
   "author": "tb0912",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ohos/common": "file:../common"
   }
 }

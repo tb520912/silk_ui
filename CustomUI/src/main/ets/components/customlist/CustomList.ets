@@ -1,5 +1,5 @@
 import promptAction from '@ohos.promptAction'
-import { LazyDataSource } from '@ohos/common'
+import { LazyDataSource } from '../../utils'
 import { ScrollReturn } from './model'
 import LoadMoreLayout, { LoadMoreStatus } from './LoadMoreLayout'
 import RefreshLayout from './RefreshLayout'
