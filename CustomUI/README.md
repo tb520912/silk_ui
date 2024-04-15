@@ -3,7 +3,7 @@
 CustomUI 是基于HarmonyOS的UI框架，可以快速开发UI界面。兼容api11以上。
 
 # 下载安装
-
+ohpm install @tb/custom_ui
 # 基础组件
 
 ## CustomPopup 抽屉
