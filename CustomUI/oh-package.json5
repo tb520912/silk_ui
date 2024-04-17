@@ -1,7 +1,7 @@
 {
-  "name": "@tb/custom_ui",
+  "name": "@tb_test/custom_ui",
   "version": "1.0.1",
-  "description": "Please describe the basic information.",
+  "description": "自定义ui组件库",
   "main": "Index.ets",
   "author": "tb0912",
   "license": "Apache-2.0",

@@ -243,8 +243,9 @@ struct CustomDialogComp {
       this.isClose = true
     })
     .animation({
-      duration: this.props.duration,
-      onFinish: () => this.finished()
+      duration: this.isClose ? this.props.duration : 0,
+      onFinish: () => this.finished(),
+      curve: Curve.EaseInOut
     })
   }
 
@@ -293,7 +294,7 @@ struct CustomDialogComp {
       case 'bottom':
         return TransitionEffect.translate({
           y: '100%'
-        }).animation({ duration: this.props.duration })
+        }).animation({ duration: this.props.duration, curve: Curve.Linear })
       case 'top':
         return TransitionEffect.translate({
           y: '-100%'

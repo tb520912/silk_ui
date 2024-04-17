@@ -56,11 +56,12 @@ struct Index {
           })
         CustomPopup({
           show: this.showPopupCenter,
-          showPosition: 'left'
+          showPosition: 'bottom'
         }) {
           Column(){
             Text('内容区')
           }
+          .height(400)
         }
 
         DropDownMenu({
