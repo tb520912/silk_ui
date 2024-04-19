@@ -6,7 +6,7 @@ import RefreshLayout from './RefreshLayout'
 
 
 // 列表分割线
-interface ListDivider {
+export interface ListDivider {
   strokeWidth: Length,
   color?:ResourceColor,
   startMargin?: Length,
@@ -32,9 +32,9 @@ export struct CustomList {
   @Prop
   finished: boolean
   // 数据源
-  @Link
+  @Prop
   @Watch('updateDataSource')
-  dataSource: object[]
+  dataSource: object[] = []
   // 懒加载
   listDataSource: LazyDataSource<object> = new LazyDataSource<object>()
   updateDataSource() {

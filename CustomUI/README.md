@@ -215,7 +215,7 @@ import { DropDownMenu } from "@tb_test/custom_ui"
 | hasOverlay             | 是否有遮罩                        | boolean                     | true                           |
 | @Prop disabled         | 是否禁用                         | boolean                     | false                          |
 
-## CustomDialog 对话框
+## CustomToast 对话框
 
 1.介绍
 
@@ -223,7 +223,7 @@ import { DropDownMenu } from "@tb_test/custom_ui"
 2.引入
 
 ```arkTS
-import { CustomDialog } from "@tb_test/custom_ui"
+import { CustomToast } from "@tb_test/custom_ui"
 ```
 
 3.使用
@@ -231,13 +231,13 @@ import { CustomDialog } from "@tb_test/custom_ui"
 1. 基础用法
 
    ```arkTS
-   CustomDialog.success('成功')
+   CustomToast.success('成功')
    ```
 
     2. 自定义用法
 
        ```arkTS
-       CustomDialog({
+       CustomToast.success({
          message: '标题',
          duration: 1000,
          showIcon: true,
@@ -256,3 +256,43 @@ import { CustomDialog } from "@tb_test/custom_ui"
 | icon         | 自定义图标   | ResourceStr                     | -        |
 | showPosition | 展示位置    | _'top' \| 'bottom' \| 'center'_ | 'center' |
 
+## CustomList 列表
+
+1.介绍
+
+`列表组件。用于展示列表数据，支持下拉刷新和上拉加载更多`
+2.引入
+
+```arkTS
+import { CustomList } from "@tb_test/custom_ui"
+```
+
+3.使用
+
+   ```arkTS
+   CustomList({
+      dataSource: this.list,
+      finished: this.finished,
+      onLoad: () => this.load(),
+      onRefresh: () => this.refresh(),
+      children: (item: object) => this.children(item)
+   })
+   ```
+
+4. API
+
+| 参数                     | 说明             | 类型                                      | 默认值                                                   |
+|------------------------|----------------|-----------------------------------------|-------------------------------------------------------|
+| dataSource             | 数据源            | object[]                                | []                                                    |
+| @Prop finished         | 是否加载了所有        | boolean                                 | false                                                 |
+| onLoad                 | 加载数据源方法 触底自动执行 | () => Promise<void>                     | -                                                     |
+| onRefresh              | 刷新方法           | () => Promise<void>                     | -                                                     |
+| @BuilderParam children | 列表项组件          | Builder                                 | -                                                     |
+| keyGenera              | 键的生成器函数        | (item: object, index: number) => string | (item: object, index: number) => JSON.stringify(item) |
+| divider                | 分割线样式          | _ListDivider \| null_                   | false                                                 |
+| space                  | 列表项间隔          | _number \| string_                      | 16                                                    |
+| paddingLr              | 列表两侧留白         | _number \| string_                      | 12                                                    |
+| background_color       | 背景色            | ResourceColor                           | '#ffffff'                                             |
+| offsetValue            | 列表底部偏移量 触发加载   | number                                  | 80                                                    |
+| openRefresh            | 是否开启下拉刷新       | boolean                                 | true                                                  |
+| openAutoLoad           | 是否开启自动加载       | boolean                                 | true                                                  |
