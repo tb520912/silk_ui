@@ -56,12 +56,16 @@ struct Index {
           })
         CustomPopup({
           show: this.showPopupCenter,
-          showPosition: 'bottom'
+          showPosition: 'bottom',
+          duration: 300
         }) {
           Column(){
             Text('内容区')
           }
           .height(400)
+          .onVisibleAreaChange([0.0, 1.0], (_, area) => {
+            console.log(`area_top: ${area}`)
+          })
         }
 
         DropDownMenu({
