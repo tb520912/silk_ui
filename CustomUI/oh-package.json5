@@ -1,6 +1,6 @@
 {
   "name": "@tb_test/custom_ui",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "自定义ui组件库",
   "main": "Index.ets",
   "author": "tb0912",
