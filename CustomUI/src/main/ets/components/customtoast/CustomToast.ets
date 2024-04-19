@@ -6,7 +6,7 @@ export enum MessageDialogType {
   TOAST = 'toast'
 }
 interface MessageDialogProps {
-  message: string
+  message: ResourceStr
   duration?: number
   showIcon?: boolean
   icon?: ResourceStr
@@ -36,19 +36,45 @@ struct ToastDialog {
     }, props.duration ?? 2000)
   }
 
-  success (props: MessageDialogProps) {
-    this._mounted(props, MessageDialogType.SUCCESS)
+  success (props: MessageDialogProps | string) {
+    if (typeof props === 'string') {
+      this._mounted({
+        message: props
+      }, MessageDialogType.SUCCESS)
+      return
+    } else {
+      this._mounted(props, MessageDialogType.SUCCESS)
   }
 
-  error (props: MessageDialogProps) {
-    this._mounted(props, MessageDialogType.ERROR)
   }
 
-  toast (props: MessageDialogProps) {
-    this._mounted(props, MessageDialogType.TOAST)
+  error (props: MessageDialogProps | string) {
+    if (typeof props === 'string') {
+      this._mounted({
+        message: props
+      }, MessageDialogType.ERROR)
+    } else {
+      this._mounted(props, MessageDialogType.ERROR)
+    }
   }
-  warn (props: MessageDialogProps) {
-    this._mounted(props, MessageDialogType.WARN)
+
+  toast (props: MessageDialogProps | string) {
+    if (typeof props === 'string') {
+      this._mounted({
+        message: props
+      }, MessageDialogType.TOAST)
+    } else {
+      this._mounted(props, MessageDialogType.TOAST)
+    }
+  }
+  warn (props: MessageDialogProps | string) {
+    if (typeof props === 'string') {
+      this._mounted({
+        message: props
+      }, MessageDialogType.WARN)
+    } else {
+      this._mounted(props, MessageDialogType.WARN)
+    }
   }
 
   getAlign (showPosition: 'top' | 'center' | 'bottom'): DialogAlignment {
@@ -73,7 +99,7 @@ struct CusDialog {
   type: MessageDialogType = MessageDialogType.SUCCESS
   showIcon: boolean = true
   icon: ResourceStr = ''
-  message: string = ''
+  message: ResourceStr = ''
 
 
   getImage(): ResourceStr {

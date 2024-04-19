@@ -1,4 +1,4 @@
-import { CustomPopup, DropDownMenu, DropDownMenuItemInterface } from '@ohos/ui_component'
+import { CustomPopup, CustomToast, DropDownMenu, DropDownMenuItemInterface } from '@ohos/ui_component'
 import { window } from '@kit.ArkUI'
 
 @Entry
@@ -39,6 +39,10 @@ struct Index {
         Button('popup')
           .onClick(() => {
             this.showPopupCenter = true
+          })
+        Button('testToast')
+          .onClick(() => {
+            CustomToast.success('成功了')
           })
         CustomPopup({
           show: this.showPopupCenter,
@@ -97,6 +101,8 @@ struct Index {
       }
       .justifyContent(FlexAlign.Start)
       .width('100%')
+
+
     }
     .width('100%')
     .height('100%')

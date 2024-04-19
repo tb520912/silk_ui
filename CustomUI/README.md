@@ -215,3 +215,44 @@ import { DropDownMenu } from "@tb_test/custom_ui"
 | hasOverlay             | 是否有遮罩                        | boolean                     | true                           |
 | @Prop disabled         | 是否禁用                         | boolean                     | false                          |
 
+## CustomDialog 对话框
+
+1.介绍
+
+`对话框组件。用于弹出对话框 采用函数式调用。有success error warn toast四个方法`
+2.引入
+
+```arkTS
+import { CustomDialog } from "@tb_test/custom_ui"
+```
+
+3.使用
+
+1. 基础用法
+
+   ```arkTS
+   CustomDialog.success('成功')
+   ```
+
+    2. 自定义用法
+
+       ```arkTS
+       CustomDialog({
+         message: '标题',
+         duration: 1000,
+         showIcon: true,
+         icon: '***',
+         showPosition: 'center'
+       })
+       ```
+
+    3. API
+
+| 参数           | 说明      | 类型                              | 默认值      |
+|--------------|---------|---------------------------------|----------|
+| message      | 内容 必传   | ResourceStr                     | ''       |
+| duration     | 持续时间 毫秒 | number                          | 2000     |
+| showIcon     | 是否展示图标  | boolean                         | true     |
+| icon         | 自定义图标   | ResourceStr                     | -        |
+| showPosition | 展示位置    | _'top' \| 'bottom' \| 'center'_ | 'center' |
+
