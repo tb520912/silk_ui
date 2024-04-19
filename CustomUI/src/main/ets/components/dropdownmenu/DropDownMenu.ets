@@ -2,14 +2,15 @@
 export struct DropDownMenu {
   @Link
   value: string | number
-  @State
+  @Prop
   text: string = ''
   @Prop
   options: DropDownMenuItemInterface[] = []
   @BuilderParam
-  default: () => void = this.DefaultBuilder
+  default: () => void
   // 菜单显示方向
   directionValue: 'down' | 'up' = 'down'
+  round: Length = 0
   // 动画时间
   duration: number = 300
   // 选中先颜色
@@ -28,14 +29,17 @@ export struct DropDownMenu {
   @State
   scrollTop: number = 0
   // 记录菜单显示状态
-  @State
-  @Watch('showChange')
+  @Prop
   menuFlag: boolean = false
+  changeStatus: (flag: boolean) => void = (flag) => {
+    this.menuFlag = flag
+  }
+
   controller: CustomDialogController = new CustomDialogController({
     builder: DropDownMenuDialog({
       context: () => this.DropDownMenuContent(),
       scrollTop: this.scrollTop,
-      menuFlag: this.menuFlag,
+      isClose: this.menuFlag,
       props: {
         active_color: this.active_color,
         overlay_color: this.overlay_color,
@@ -52,35 +56,9 @@ export struct DropDownMenu {
     closeAnimation: { duration: 0},
     alignment: DialogAlignment.Top
   })
-  showChange () {
-    if (!this.menuFlag) {
-      this.controller.close()
-    }
-  }
+
   aboutToAppear(): void {
-    if (this.options.length === 0) {
-      this.controller = new CustomDialogController({
-        builder: DropDownMenuDialog({
-          context: () => this.default(),
-          scrollTop: this.scrollTop,
-          menuFlag: this.menuFlag,
-          props: {
-            active_color: this.active_color,
-            overlay_color: this.overlay_color,
-            direction: this.directionValue,
-            duration: this.duration,
-            overlay: this.hasOverlay,
-            close_on_click_outside: this.close_on_click_outside,
-            close_on_click_overlay: this.close_on_click_overlay
-          }
-        }),
-        maskColor: Color.Transparent,
-        customStyle: true,
-        openAnimation: { duration: 0},
-        closeAnimation: { duration: 0},
-        alignment: DialogAlignment.Top
-      })
-    } else {
+    if (this.options.length) {
       const arr = this.options.filter((item) => item.value === this.value)
       if (arr.length) {
         this.text = arr[0].text
@@ -130,18 +108,21 @@ export struct DropDownMenu {
     })
     .onClick(() => {
       if (this.menuFlag) {
-        this.controller.close()
-        this.menuFlag = false
+        this.changeStatus(false)
       } else {
         this.controller.open()
-        this.menuFlag = true
+        this.changeStatus(true)
       }
     })
   }
 
   // 默认列表项
   @Builder
-  DefaultBuilder (): void {}
+  DefaultBuilder (): void {
+    Column(){
+      Text('组件内容区')
+    }
+  }
   // 默认弹框内容
   @Builder
   DropDownMenuContent (): void {
@@ -168,7 +149,7 @@ export struct DropDownMenu {
         maxHeight: 300
       })
     } else {
-      this.default()
+        this.default()
     }
   }
   @Builder
@@ -204,7 +185,6 @@ export struct DropDownMenu {
     .onClick(() => {
       this.value = props.value
       this.text = props.text
-      this.controller.close()
       this.menuFlag = false
     })
 
@@ -228,8 +208,9 @@ struct DropDownMenuDialog {
   context: () => void
   @Prop
   scrollTop: number = 0
+
   @Link
-  menuFlag: boolean
+  isClose: boolean
 
   props: DropDownMenuProps = defaultProps
   build() {
@@ -241,7 +222,7 @@ struct DropDownMenuDialog {
           .backgroundColor(Color.Transparent)
           .onClick(() => {
             if (this.props.close_on_click_outside) {
-              this.menuFlag = false
+              this.isClose = false
             }
           })
         Stack({ alignContent: Alignment.Top }){
@@ -251,16 +232,23 @@ struct DropDownMenuDialog {
             .backgroundColor(this.props.overlay_color)
             .onClick(() => {
               if (this.props.close_on_click_overlay) {
-                this.menuFlag = false
+                this.isClose = false
               }
             })
-          Column(){
-            this.context()
+            .opacity(this.isClose ? 1 : 0)
+            .animation({
+              duration: !this.isClose ? this.props.duration : 0,
+              onFinish: () => this.finished(),
+            })
+          if (this.isClose) {
+            Column(){
+              this.context()
+            }
+            .width('100%')
+            .transition(TransitionEffect.translate({
+              y: '-100%'
+            }).animation({ duration: this.props.duration }))
           }
-          .width('100%')
-          .transition(TransitionEffect.translate({
-            y: '-100%'
-          }).animation({ duration: this.props.duration }))
         }
 
         .padding({
@@ -275,18 +263,25 @@ struct DropDownMenuDialog {
             .width('100%')
             .height('100%')
             .backgroundColor(this.props.overlay_color)
+            .opacity(this.isClose ? 1 : 0)
             .onClick(() => {
               if (this.props.close_on_click_overlay) {
-                this.menuFlag = false
+                this.isClose = false
               }
             })
-          Column(){
-            this.context()
+            .animation({
+              duration: !this.isClose ? this.props.duration : 0,
+              onFinish: () => this.finished(),
+            })
+          if (this.isClose) {
+            Column(){
+              this.context()
+            }
+            .width('100%')
+            .transition(TransitionEffect.translate({
+              y: '100%'
+            }).animation({ duration: this.props.duration }))
           }
-          .width('100%')
-          .transition(TransitionEffect.translate({
-            y: '100%'
-          }).animation({ duration: this.props.duration }))
         }
 
         .padding({
@@ -301,14 +296,19 @@ struct DropDownMenuDialog {
           .backgroundColor(Color.Transparent)
           .onClick(() => {
             if (this.props.close_on_click_outside) {
-              this.menuFlag = false
+              this.isClose = false
             }
           })
       }
-
     }
     .width('100%')
     .height('100%')
+  }
+
+  finished() {
+    if (!this.isClose) {
+      this.controller.close()
+    }
   }
 }
 export interface DropDownMenuItemInterface {

@@ -93,3 +93,125 @@ import { CustomPopup } from "@tb_test/custom_ui"
    ```
 
    仅此一个 推荐使用尾随闭包方式传递
+
+## DropDownMenu 下拉菜单
+
+1.介绍
+
+`下拉菜单组件。用于下拉菜单的展示。和前端vant的组件功能类似`
+2.引入
+
+```arkTS
+import { DropDownMenu } from "@tb_test/custom_ui"
+```
+
+3.使用
+
+1. 基础用法
+
+   `使用状态变量控制菜单的文本内容 组件内使用@Link装饰value参数接收`
+
+   `通过options参数设置下拉菜单的选项，options为数组，数组元素为对象，对象包含text和value两个属性 导出了DropDownMenuItemInterface接口`
+
+   ```arkTS
+   import { DropDownMenu, DropDownMenuItemInterface } from '@ohos/ui_component'
+      @State
+      value: number = 0
+      @State
+      list: DropDownMenuItemInterface[] = [{
+        text: '选项1',
+        value: 0
+      }, {
+        text: '选项2',
+        value: 1
+      }, {
+        text: '选项3',
+        value: 2
+      }]
+  
+  
+   DropDownMenu({
+      value: this.value,
+      options: this.list,
+   })
+   ```
+
+2.自定义内容
+
+`通过传递@BuilderParam参数设置自定义内容，可使用尾随闭包方式传递`
+
+   ```arkTS
+
+   `该参数非状态变量`
+   ` !!!注意 自定义内容时 
+   需要设置菜单的文本内容，传入text属性 必传 该参数使用@Prop装饰
+   需要设置菜单的状态，传入menuFlag属性 必传 该参数使用@Prop装饰
+   需要设置菜单的状态改变方法，传入changeStatus属性 必传 该参数使用@Prop装饰
+   并且点击事件需要自行处理。
+   `
+   ``
+
+   ```arkTS
+   @State // 菜单项文本
+   text: string = this.list[0].text
+   @State // 菜单状态
+   menuFlag: boolean = false
+   changeFlag(flag: boolean):void {
+     this.menuFlag = flag
+   }
+  
+   DropDownMenu({
+     value: this.value,
+     text: this.text,
+     menuFlag: this.menuFlag,
+     changeStatus: (flag: boolean) => this.changeFlag(flag)
+   }) {
+     Column(){
+       ForEach(this.list, (item: DropDownMenuItemInterface, index: number) => {
+         Row(){
+           Text(item.text)
+             .fontColor(item.value === this.value ? $r('app.color.base_color') : Color.Black)
+           Image($r('app.media.ic_public_ok'))
+             .width(16)
+             .aspectRatio(1)
+             .fillColor($r('app.color.base_color'))
+             .visibility(item.value === this.value ? Visibility.Visible : Visibility.Hidden)
+         }
+         .onClick(() => {
+           this.text = item.text
+           this.value = item.value
+           this.menuFlag = false
+         })
+       })
+     }
+     .width('100%')
+     .backgroundColor(Color.White)
+     .borderRadius({
+       bottomLeft: 16,
+       bottomRight: 16
+     })
+   }
+   ```
+
+3. API
+
+    1. props
+
+| 参数                     | 说明                           | 类型                          | 默认值                            |
+|------------------------|------------------------------|-----------------------------|--------------------------------|
+| @Link value            | 选中项的value属性                  | _string \| number_          | -                              |
+| @Prop text             | 如果使用自定义内容区 则该参数必传            | string                      | -                              |
+| @Prop options          | 列表项 如果传递 默认使用默认内容区           | DropDownMenuItemInterface[] | []                             |
+| @Prop menuFlag         | 菜单展开状态 如果使用自定义内容区 则该参数必传     | boolean                     | false                          |
+| @Prop changeStatus     | 修改菜单展开状态方法 如果使用自定义内容区 则该参数必传 | (flag: boolean) => void     | (flag) => this.menuFlag = flag |
+| @BuilderParam  default | 自定义内容区                       | () => void                  | -                              |
+| directionValue         | 菜单展开方向                       | _'down' \| 'up'_            | 'down'                         |
+| duration               | 动画时长                         | number                      | 300                            |
+| round                  | 菜单圆角                         | Length                      | 0                              |
+| overlay_color          | 遮罩颜色                         | ResourceColor               | '#B3000000'                    |
+| close_on_click_overlay | 点击遮罩是否关闭菜单                   | boolean                     | true                           |
+| close_on_click_outside | 点击菜单或其它元素是否关闭菜单              | boolean                     | true                           |
+| active_color           | 主题色                          | ResourceColor               | '#0581ce'                      |
+| hasOverlay             | 是否有遮罩                        | boolean                     | true                           |
+| @Prop disabled         | 是否禁用                         | boolean                     | false                          |
+

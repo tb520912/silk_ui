@@ -7,8 +7,7 @@ struct Index {
   @State
   showPopupCenter: boolean = false
   @State
-  value: number = 0
-  @State
+  value: number | string = 0
   list: DropDownMenuItemInterface[] = [{
     text: '选项1',
     value: 0
@@ -18,34 +17,21 @@ struct Index {
   }, {
     text: '选项3',
     value: 2
-  }, {
-    text: '选项4',
-    value: 3
-  }, {
-    text: '选项5',
-    value: 4
-  }, {
-    text: '选项6',
-    value: 5
-  }, {
-    text: '选项7',
-    value: 6
-  }, {
-    text: '选项8',
-    value: 7
-  }, {
-    text: '选项9',
-    value: 8
-  }, {
-    text: '选项10',
-    value: 9
   }]
+  @State
+  text: string = this.list[0].text
+  @State
+  menuFlag: boolean = false
+  changeFlag(flag: boolean):void {
+    this.menuFlag = flag
+  }
   async aboutToAppear(): Promise<void> {
     const win = await window.getLastWindow(getContext(this))
     await win.setWindowLayoutFullScreen(true)
   }
   build() {
     Row() {
+
       Column({ space: 20}) {
         Text('CustomUI')
           .fontSize(50)
@@ -71,12 +57,43 @@ struct Index {
         DropDownMenu({
           value: this.value,
           options: this.list,
-          directionValue: 'up',
-          disabled: true
         })
           .margin({
             top: 300
           })
+
+        Text(this.menuFlag + '')
+        DropDownMenu({
+          value: this.value,
+          text: this.text,
+          menuFlag: this.menuFlag,
+          changeStatus: (flag: boolean) => this.changeFlag(flag)
+        }) {
+          Column(){
+            ForEach(this.list, (item: DropDownMenuItemInterface, index: number) => {
+              Row(){
+                Text(item.text)
+                  .fontColor(item.value === this.value ? $r('app.color.base_color') : Color.Black)
+                Image($r('app.media.ic_public_ok'))
+                  .width(16)
+                  .aspectRatio(1)
+                  .fillColor($r('app.color.base_color'))
+                  .visibility(item.value === this.value ? Visibility.Visible : Visibility.Hidden)
+              }
+              .onClick(() => {
+                this.text = item.text
+                this.value = item.value as number
+                this.menuFlag = false
+              })
+            })
+          }
+          .width('100%')
+          .backgroundColor(Color.White)
+          .borderRadius({
+            bottomLeft: 16,
+            bottomRight: 16
+          })
+        }
       }
       .justifyContent(FlexAlign.Start)
       .width('100%')
