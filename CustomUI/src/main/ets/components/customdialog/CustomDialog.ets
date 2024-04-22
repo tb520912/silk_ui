@@ -1,17 +1,32 @@
+
 @Component
 export struct CustomDialogBox {
-  @State message: string = 'Hello World';
+  // 控制弹框是否展示
+  @Link
+  show: boolean
+  title: string = ''
+  message: string = ''
+  messageAlign: string = 'center'
+  theme: 'round-button' | 'default' = 'default'
+  bgcColor: ResourceStr = $r('app.color.white')
+  showConfirm: boolean = true
+  showCancel: boolean = false
+  confirmText: ResourceStr = '确定'
+  cancelText: ResourceStr = '取消'
+  confirmColor: ResourceStr = $r('app.color.base_color')
+  cancelColor: ResourceStr = $r('app.color.base_font_color3')
+  confirmBgColor: ResourceColor = Color.Transparent
+  cancelBgColor: ResourceColor = Color.Transparent
+  confirmFontSize: number = 16
+  cancelFontSize: number = 16
+  confirmButtonDisabled: boolean = false
+  cancelButtonDisabled: boolean = false
+  overlayValue: boolean = true
+  overlayColor: ResourceColor = $r('app.color.overlay_bg')
+  closeOnPopstate: boolean = true
 
   build() {
-    Row() {
-      Column() {
-        Text(this.message)
-          .fontSize(50)
-          .fontWeight(FontWeight.Bold)
-      }
-      .width('100%')
-    }
-    .height('100%')
+
   }
 }
 @CustomDialog
@@ -32,7 +47,12 @@ struct CustomDialogComp {
     Column(){
       this.HeaderBuilder()
       this.ContentBuilder()
+      this.FooterBuilder()
     }
+    .width(this.props.width)
+    .clip(true)
+    .backgroundColor(this.props.bgcColor)
+    .borderRadius(this.props.round)
   }
   @Builder
   HeaderBuilder () {
@@ -78,19 +98,56 @@ struct CustomDialogComp {
       this.footer()
     } else if (this.props.showConfirm || this.props.showCancel) {
       Row() {
-        if (this.props.showCancel) {
-          Button(this.props.cancelText || '取消')
-            .width('100%')
-            .height(48)
-            .fontSize(16)
-            .fontColor(this.props.cancelColor || $r('app.color.base_font_color3'))
-            .backgroundColor(this.props.cancelBgColor || $r('app.color.base_bg_color'))
-            .borderRadius(this.props.round || 8)
-            .onClick(() => {
-              this.controller.close()
+        // 只有一个确认按钮
+        if (!this.props.showCancel && this.props.showConfirm ) {
+            Button(this.props.confirmText, {
+              type: this.props.theme === 'default' ? ButtonType.Normal : ButtonType.Capsule
             })
+              .backgroundColor(this.props.confirmBgColor)
+              .fontSize(this.props.confirmFontSize)
+              .fontColor(this.props.confirmColor)
+              .onClick(() => {
+                this.controller.close
+              })
+              .width('100%')
+              .height(this.props.theme === 'default' ? 48 : 38)
+        } else {
+          Button(this.props.cancelText)
+            .backgroundColor(this.props.cancelBgColor)
+            .fontSize(this.props.cancelFontSize)
+            .fontColor(this.props.cancelColor)
+            .onClick(() => {
+              this.controller.close
+            })
+            .layoutWeight(1)
+            .height(48)
+          Divider()
+            .strokeWidth(1)
+            .color('#ebedfo')
+          Button(this.props.confirmText)
+            .backgroundColor(this.props.confirmBgColor)
+            .fontSize(this.props.confirmFontSize)
+            .fontColor(this.props.confirmColor)
+            .onClick(() => {
+              this.controller.close
+            })
+            .layoutWeight(1)
+            .height(48)
         }
       }
+      .padding({
+        top: this.props.theme === 'default' ? 0 : 8,
+        left: this.props.theme === 'default' ? 0 : 24,
+        right: this.props.theme === 'default' ? 0 : 24,
+        bottom: this.props.theme === 'default' ? 0 : 16,
+      })
+      .width('100%')
+      .border({
+        width: {
+          top: this.props.theme === 'default' ? 1 : 0
+        },
+        color: '#ebedfo'
+      })
     }
   }
 
@@ -106,31 +163,31 @@ struct CustomDialogComp {
 }
 
 export interface CustomDialogProps {
-  message?: ResourceStr
-  title?: ResourceStr
-  width?: Length
-  messageAlign?: 'left' | 'right' | 'center'
+  message: ResourceStr
+  title: ResourceStr
+  width: Length
+  messageAlign: 'left' | 'right' | 'center'
   // 圆角按钮
-  theme?: 'round-button' | 'default'
-  round?: Length | BorderRadiuses
+  theme: 'round-button' | 'default'
+  round: Length | BorderRadiuses
   // 对话框颜色
-  bgcColor?: ResourceColor
-  showConfirm?: boolean
-  showCancel?: boolean
-  confirmText?: ResourceStr
-  cancelText?: ResourceStr
-  confirmColor?: Color
-  cancelColor?: Color
-  confirmBgColor?: Color
-  cancelBgColor?: Color
-  confirmFontSize?: number
-  cancelFontSize?: number
-  confirmButtonDisabled?: boolean
-  cancelButtonDisabled?: boolean
-  overlay?: boolean
-  overlayColor?: ResourceColor
+  bgcColor: ResourceColor
+  showConfirm: boolean
+  showCancel: boolean
+  confirmText: ResourceStr
+  cancelText: ResourceStr
+  confirmColor: Color
+  cancelColor: Color
+  confirmBgColor: Color
+  cancelBgColor: Color
+  confirmFontSize: number
+  cancelFontSize: number
+  confirmButtonDisabled: boolean
+  cancelButtonDisabled: boolean
+  overlay: boolean
+  overlayColor: ResourceColor
   // 是否在关闭时或者页面回退时自动关闭
-  closeOnPopstate?: boolean
+  closeOnPopstate: boolean
   beforeClose?: () => boolean
   transition?: TransitionEffect
   confirm?: () => void
