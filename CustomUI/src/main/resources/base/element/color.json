@@ -31,6 +31,10 @@
     {
       "name": "border_color",
       "value": "#ebedf0"
+    },
+    {
+      "name": "base_bg_color",
+      "value": "#fafafa"
     }
   ]
 }

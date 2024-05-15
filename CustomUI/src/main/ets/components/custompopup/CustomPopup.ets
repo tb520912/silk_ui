@@ -1,5 +1,5 @@
 import { window } from '@kit.ArkUI'
-
+import observer from '@ohos.arkui.observer';
 @Component
 export struct CustomPopup {
   // 控制弹框是否展示
@@ -51,13 +51,21 @@ export struct CustomPopup {
         safe_bottom: this.safe_bottom,
         closeHandler: () => this.defaultClose()
       },
-      children: this.default
+      children: this.default,
+
     }),
     customStyle: true,
     openAnimation: { duration: 0 },
     closeAnimation: { duration: 0 },
     maskColor: Color.Transparent,
-    alignment: this.getDialogAlignment()
+    alignment: this.getDialogAlignment(),
+    onWillDismiss:(dismissDialogAction: DismissDialogAction)=> {
+      console.info("reason=" + JSON.stringify(dismissDialogAction.reason))
+      console.log("dialog onWillDismiss")
+      if (dismissDialogAction.reason == DismissReason.TOUCH_OUTSIDE) {
+        dismissDialogAction.dismiss()
+      }
+    }
   })
 
   getDialogAlignment(): DialogAlignment {
@@ -104,8 +112,16 @@ export struct CustomPopup {
   updateShow() {
     if (this.show) {
       this.showHandler()
+      if (this.close_on_pop_state) {
+        // 页面变化时关闭弹框
+        this.getUIContext().getUIObserver().on('navDestinationSwitch',  () => this.callback())
+      }
     } else {
       this.closeHandler()
+      if (this.close_on_pop_state) {
+        // 页面变化时关闭弹框
+        this.getUIContext().getUIObserver().off('navDestinationSwitch', () => this.callback())
+      }
     }
   }
 
@@ -131,6 +147,10 @@ export struct CustomPopup {
     this.click_overlay()
     this.closeHandler()
   }
+  callback (): void{
+  // console.info(`navigation page switched, switchInfo: ${}`);
+    this.show = false
+};
 
   aboutToAppear(): void {
     if (this.showPosition === 'center') {
@@ -148,6 +168,7 @@ export struct CustomPopup {
         alignment: DialogAlignment.Center
       })
     }
+
   }
 
   build() {
