@@ -32,9 +32,9 @@ export struct CustomList {
   @Prop
   finished: boolean
   // 数据源
-  @Prop
+  @Link
   @Watch('updateDataSource')
-  dataSource: object[] = []
+  dataSource: object[]
   // 懒加载
   listDataSource: LazyDataSource<object> = new LazyDataSource<object>()
   updateDataSource() {

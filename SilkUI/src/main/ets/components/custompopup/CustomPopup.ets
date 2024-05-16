@@ -409,7 +409,6 @@ struct CustomDialogCompCenter {
   build() {
     Column() {
       this.children()
-      Text('居中弹框')
     }
     .constraintSize({
       maxWidth: '95%',
