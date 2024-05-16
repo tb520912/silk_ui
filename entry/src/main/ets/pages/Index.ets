@@ -1,4 +1,4 @@
-import { CustomPopup, CustomToast, DropDownMenu, DropDownMenuItemInterface } from '@ohos/ui_component'
+import { CustomDialogBox, CustomPopup, CustomToast, DropDownMenu, DropDownMenuItemInterface } from '@ohos/ui_component'
 import { window } from '@kit.ArkUI'
 
 @Entry
@@ -6,6 +6,8 @@ import { window } from '@kit.ArkUI'
 struct Index {
   @State
   showPopupCenter: boolean = false
+  @State
+  dialogShow: boolean = false
   @State
   value: number | string = 0
   list: DropDownMenuItemInterface[] = [{
@@ -98,6 +100,16 @@ struct Index {
             bottomRight: 16
           })
         }
+
+        Button('CustomDialog')
+          .onClick(() => {
+            this.dialogShow = true
+          })
+        CustomDialogBox({
+          show: this.dialogShow,
+          title: '标题',
+          message: '消息'
+        })
       }
       .justifyContent(FlexAlign.Start)
       .width('100%')

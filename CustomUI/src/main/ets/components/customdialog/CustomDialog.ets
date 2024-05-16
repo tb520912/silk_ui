@@ -3,11 +3,14 @@
 export struct CustomDialogBox {
   // 控制弹框是否展示
   @Link
+  @Watch('updateShow')
   show: boolean
   title: string = ''
+  widthValue: Length = '80%'
   message: string = ''
-  messageAlign: string = 'center'
+  messageAlign: 'left' | 'right' | 'center' = 'center'
   theme: 'round-button' | 'default' = 'default'
+  round: Length = 16
   bgcColor: ResourceStr = $r('app.color.white')
   showConfirm: boolean = true
   showCancel: boolean = false
@@ -21,10 +24,73 @@ export struct CustomDialogBox {
   cancelFontSize: number = 16
   confirmButtonDisabled: boolean = false
   cancelButtonDisabled: boolean = false
-  overlayValue: boolean = true
+  showOverlay: boolean = true
   overlayColor: ResourceColor = $r('app.color.overlay_bg')
-  closeOnPopstate: boolean = true
+  close_on_pop_state: boolean = true
+  onConfirm: () => void = () => {this.show = false}
+  onCancel: () => void = () => {this.show = false}
 
+  controller: CustomDialogController = new CustomDialogController({
+    builder: CustomDialogComp({
+      props: {
+        title: this.title,
+        widthValue: this.widthValue,
+        message: this.message,
+        messageAlign: this.messageAlign,
+        theme: this.theme,
+        round: this.round,
+        bgcColor: this.bgcColor,
+        showConfirm: this.showConfirm,
+        showCancel: this.showCancel,
+        confirmText: this.confirmText,
+        cancelText: this.cancelText,
+        confirmColor: this.confirmColor,
+        cancelColor: this.cancelColor,
+        confirmBgColor: this.confirmBgColor,
+        cancelBgColor: this.cancelBgColor,
+        confirmFontSize: this.confirmFontSize,
+        cancelFontSize: this.cancelFontSize,
+        confirmButtonDisabled: this.confirmButtonDisabled,
+        cancelButtonDisabled: this.cancelButtonDisabled,
+        showOverlay: this.showOverlay,
+        overlayColor: this.overlayColor,
+        confirm: () => this.onConfirm(),
+        cancel: () => this.onCancel()
+      }
+    }),
+    alignment: DialogAlignment.Center,
+    customStyle: true
+  })
+
+  callback (): void{
+    // console.info(`navigation page switched, switchInfo: ${}`);
+    this.show = false
+  };
+  showHandler() {
+    this.controller.open()
+    this.show = true
+  }
+
+  async closeHandler(): Promise<void> {
+      this.controller.close()
+      this.show = false
+  }
+  // 显示隐藏
+  updateShow() {
+    if (this.show) {
+      this.showHandler()
+      if (this.close_on_pop_state) {
+        // 页面变化时关闭弹框
+        this.getUIContext().getUIObserver().on('navDestinationSwitch',  () => this.callback())
+      }
+    } else {
+      this.closeHandler()
+      if (this.close_on_pop_state) {
+        // 页面变化时关闭弹框
+        this.getUIContext().getUIObserver().off('navDestinationSwitch', () => this.callback())
+      }
+    }
+  }
   build() {
 
   }
@@ -49,7 +115,7 @@ struct CustomDialogComp {
       this.ContentBuilder()
       this.FooterBuilder()
     }
-    .width(this.props.width)
+    .width(this.props.widthValue)
     .clip(true)
     .backgroundColor(this.props.bgcColor)
     .borderRadius(this.props.round)
@@ -107,7 +173,7 @@ struct CustomDialogComp {
               .fontSize(this.props.confirmFontSize)
               .fontColor(this.props.confirmColor)
               .onClick(() => {
-                this.controller.close
+                this.props.confirm && this.props.confirm()
               })
               .width('100%')
               .height(this.props.theme === 'default' ? 48 : 38)
@@ -117,10 +183,11 @@ struct CustomDialogComp {
             .fontSize(this.props.cancelFontSize)
             .fontColor(this.props.cancelColor)
             .onClick(() => {
-              this.controller.close
+              this.props.cancel && this.props.cancel()
             })
             .layoutWeight(1)
             .height(48)
+            .enabled(!this.props.cancelButtonDisabled)
           Divider()
             .strokeWidth(1)
             .color('#ebedfo')
@@ -129,10 +196,11 @@ struct CustomDialogComp {
             .fontSize(this.props.confirmFontSize)
             .fontColor(this.props.confirmColor)
             .onClick(() => {
-              this.controller.close
+              this.props.confirm && this.props.confirm()
             })
             .layoutWeight(1)
             .height(48)
+            .enabled(!this.props.confirmButtonDisabled)
         }
       }
       .padding({
@@ -144,9 +212,9 @@ struct CustomDialogComp {
       .width('100%')
       .border({
         width: {
-          top: this.props.theme === 'default' ? 1 : 0
+          top: this.props.theme === 'default' ? '1px' : 0
         },
-        color: '#ebedfo'
+        color: '#ebedf0'
       })
     }
   }
@@ -163,38 +231,33 @@ struct CustomDialogComp {
 }
 
 export interface CustomDialogProps {
-  message: ResourceStr
-  title: ResourceStr
-  width: Length
-  messageAlign: 'left' | 'right' | 'center'
+  message?: ResourceStr
+  title?: ResourceStr
+  widthValue?: Length
+  messageAlign?: 'left' | 'right' | 'center'
   // 圆角按钮
-  theme: 'round-button' | 'default'
-  round: Length | BorderRadiuses
+  theme?: 'round-button' | 'default'
+  round?: Length | BorderRadiuses
   // 对话框颜色
-  bgcColor: ResourceColor
-  showConfirm: boolean
-  showCancel: boolean
-  confirmText: ResourceStr
-  cancelText: ResourceStr
-  confirmColor: Color
-  cancelColor: Color
-  confirmBgColor: Color
-  cancelBgColor: Color
-  confirmFontSize: number
-  cancelFontSize: number
-  confirmButtonDisabled: boolean
-  cancelButtonDisabled: boolean
-  overlay: boolean
-  overlayColor: ResourceColor
+  bgcColor?: ResourceColor
+  showConfirm?: boolean
+  showCancel?: boolean
+  confirmText?: ResourceStr
+  cancelText?: ResourceStr
+  confirmColor?: ResourceColor
+  cancelColor?: ResourceColor
+  confirmBgColor?: ResourceColor
+  cancelBgColor?: ResourceColor
+  confirmFontSize?: number
+  cancelFontSize?: number
+  confirmButtonDisabled?: boolean
+  cancelButtonDisabled?: boolean
+  showOverlay?: boolean
+  overlayColor?: ResourceColor
   // 是否在关闭时或者页面回退时自动关闭
-  closeOnPopstate: boolean
+  closeOnPopstate?: boolean
   beforeClose?: () => boolean
   transition?: TransitionEffect
   confirm?: () => void
   cancel?: () => void
-  onClose?: () => void
-  open?: () => void
-  close?: () => void
-  opened?: () => void
-  closed?: () => void
 }
