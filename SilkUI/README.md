@@ -1,10 +1,10 @@
 # CustomUI 简介
 
-CustomUI 是基于HarmonyOS的UI框架，可以快速开发UI界面。兼容api11以上。
+SilkUI 是基于HarmonyOS的UI框架，可以快速开发UI界面。兼容api11以上。
 
 # 下载安装
 
-ohpm install @tb_test/custom_ui
+ohpm install @tb_test/silkui
 
 # 基础组件
 
@@ -17,7 +17,7 @@ ohpm install @tb_test/custom_ui
 2.引入
 
 ```arkTS
-import { CustomPopup } from "@tb_test/custom_ui"
+import { CustomPopup } from "@tb_test/silkui"
 ```
 
 3.使用
@@ -102,7 +102,7 @@ import { CustomPopup } from "@tb_test/custom_ui"
 2.引入
 
 ```arkTS
-import { DropDownMenu } from "@tb_test/custom_ui"
+import { DropDownMenu } from "@tb_test/silkui"
 ```
 
 3.使用
@@ -223,7 +223,7 @@ import { DropDownMenu } from "@tb_test/custom_ui"
 2.引入
 
 ```arkTS
-import { CustomToast } from "@tb_test/custom_ui"
+import { CustomToast } from "@tb_test/silkui"
 ```
 
 3.使用
@@ -264,7 +264,7 @@ import { CustomToast } from "@tb_test/custom_ui"
 2.引入
 
 ```arkTS
-import { CustomList } from "@tb_test/custom_ui"
+import { CustomList } from "@tb_test/silkui"
 ```
 
 3.使用

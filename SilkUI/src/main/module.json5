@@ -1,6 +1,6 @@
 {
   "module": {
-    "name": "CustomUI",
+    "name": "SilkUI",
     "type": "har",
     "deviceTypes": [
       "default",

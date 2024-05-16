@@ -6,7 +6,7 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "@ohos/ui_component": "file:../CustomUI"
+    "@ohos/ui_component": "file:../SilkUI"
   }
 }
 

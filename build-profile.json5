@@ -46,8 +46,8 @@
       ]
     },
     {
-      "name": "CustomUI",
-      "srcPath": "./CustomUI"
+      "name": "SilkUI",
+      "srcPath": "./SilkUI"
     },
     {
       "name": "common",
