@@ -1,6 +1,13 @@
 {
   "src": [
-    "pages/Index",
-    "pages/TestNavDialog"
+    "pages/Collapse",
+    "pages/Dialog",
+    "pages/DropdownMenu",
+    "pages/ImageUpload",
+    "pages/ListPage",
+    "pages/PopupPage",
+    "pages/SelectPage",
+    "pages/TabBarPage",
+    "pages/ToastPage"
   ]
 }

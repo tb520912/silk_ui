@@ -48,10 +48,6 @@
     {
       "name": "SilkUI",
       "srcPath": "./SilkUI"
-    },
-    {
-      "name": "common",
-      "srcPath": "./common"
     }
   ]
 }

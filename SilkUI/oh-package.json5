@@ -1,10 +1,13 @@
 {
   "name": "silk_ui",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "自定义ui组件库",
   "main": "Index.ets",
   "author": "tb0912",
   "license": "Apache-2.0",
+  "keywords": ["ui", "UI", "SILK_UI", "SILK", "silk_ui", "silk", "vant"],
+  "homepage": "https://gitee.com/tianbin0912/uicomponent",
+  "repository": "https://gitee.com/tianbin0912/uicomponent",
   "dependencies": {
   }
 }
