@@ -1,28 +1,30 @@
 
 @Component
-export struct CustomDialogBox {
+export struct SilkDialog {
   // 控制弹框是否展示
   @Link
   @Watch('updateShow')
   show: boolean
-  title: string = ''
+  title: ResourceStr = ''
   widthValue: Length = '80%'
-  message: string = ''
+  message: ResourceStr = ''
   messageAlign: 'left' | 'right' | 'center' = 'center'
   theme: 'round-button' | 'default' = 'default'
   round: Length = 16
-  bgcColor: ResourceStr = $r('app.color.white')
+  bgcColor: ResourceColor = $r('app.color.white')
   showConfirm: boolean = true
   showCancel: boolean = false
   confirmText: ResourceStr = '确定'
   cancelText: ResourceStr = '取消'
-  confirmColor: ResourceStr = $r('app.color.base_color')
-  cancelColor: ResourceStr = $r('app.color.base_font_color3')
+  confirmColor: ResourceColor = '#1989fa'
+  cancelColor: ResourceColor = $r('app.color.base_font_color3')
   confirmBgColor: ResourceColor = Color.Transparent
   cancelBgColor: ResourceColor = Color.Transparent
-  confirmFontSize: number = 16
-  cancelFontSize: number = 16
+  confirmFontSize: Length = 16
+  cancelFontSize: Length = 16
+  @Prop
   confirmButtonDisabled: boolean = false
+  @Prop
   cancelButtonDisabled: boolean = false
   showOverlay: boolean = true
   overlayColor: ResourceColor = $r('app.color.overlay_bg')
@@ -31,7 +33,7 @@ export struct CustomDialogBox {
   onCancel: () => void = () => {this.show = false}
 
   controller: CustomDialogController = new CustomDialogController({
-    builder: CustomDialogComp({
+    builder: DialogComp({
       props: {
         title: this.title,
         widthValue: this.widthValue,
@@ -96,7 +98,8 @@ export struct CustomDialogBox {
   }
 }
 @CustomDialog
-struct CustomDialogComp {
+@Component
+struct DialogComp {
   controller: CustomDialogController
   // 自定义内容
   @BuilderParam
@@ -108,7 +111,7 @@ struct CustomDialogComp {
   @BuilderParam
   footer: () => void
   @Prop
-  props: CustomDialogProps
+  props: SilkDialogProps
   build() {
     Column(){
       this.HeaderBuilder()
@@ -230,7 +233,7 @@ struct CustomDialogComp {
   }
 }
 
-export interface CustomDialogProps {
+export interface SilkDialogProps {
   message?: ResourceStr
   title?: ResourceStr
   widthValue?: Length
@@ -248,8 +251,8 @@ export interface CustomDialogProps {
   cancelColor?: ResourceColor
   confirmBgColor?: ResourceColor
   cancelBgColor?: ResourceColor
-  confirmFontSize?: number
-  cancelFontSize?: number
+  confirmFontSize?: Length
+  cancelFontSize?: Length
   confirmButtonDisabled?: boolean
   cancelButtonDisabled?: boolean
   showOverlay?: boolean

@@ -1,5 +1,7 @@
+import { SilkTabItem, SilkTabItemInterface, SilkTabStyle } from '../../utils'
+
 @Component
-export struct CustomTabs {
+export struct SilkTabs {
   @State
   showToast: boolean = false
   @State
@@ -20,12 +22,9 @@ export struct CustomTabs {
   @BuilderParam
   rightBuild: () => void
   @BuilderParam
-  tarBar: ($$: CustomTabsTarBarInterface) => void = this.tarBarItem
-
+  tarBar: ($$: SilkTabsTarBarInterface) => void = this.tarBarItem
   // tab间距
   tabSpace: number = 0
-  // 接收传递的tab点击事件
-  tabClick: ($$: CustomTabsTarBarInterface, event: ClickEvent) => void = ($$, event) => {}
   // 接收content内容  swiper
   @State
   duration: number = 400
@@ -51,14 +50,25 @@ export struct CustomTabs {
   @Link
   @Watch('toMessageParent')
   currentIndex: number
-
-  // 给父组件一个方法 通知父组件 索引更新了（若将currentIndex进行双向绑定 则很多无需使用的地方都要写多余的代码）
-  toMessageParent () {
-    this.initActive()
-  }
   saveTime: number = 0
   // 记录swiper item宽度
   swiperWidth: number = 0
+  _centerLeftV: number = 0 // 居中时 整体的左偏移量
+  // 这是用户传递的
+  line: ActiveLineInterface = {}
+  // tabitem数组
+  @Require
+  @Prop
+  tabItem: Object[] = [
+    new SilkTabItem({
+      title: '资料库0',
+    }),
+    new SilkTabItem({
+      title: '资料库1',
+    }),
+  ]
+  @State
+  showToastFlag: boolean = false
   // tabBar样式
   private barHeight: number = 44
   private barBgc: ResourceStr | Color = $r('app.color.white')
@@ -79,38 +89,30 @@ export struct CustomTabs {
   }
   // 对齐方式
   private flexStyle: FlexAlign = FlexAlign.Center
-  _centerLeftV: number = 0 // 居中时 整体的左偏移量
   // BACKGROUND
   private bgcActiveRadius: number = 15
   private bgcActiveBgc: ResourceStr | Color = $r('app.color.white')
   private bgcBorder: BorderOptions = {}
-  private bgcZIndex: number = 0
   // Line
-  // 这是用户传递的
-  line: ActiveLineInterface = {}
+  private bgcZIndex: number = 0
   private _line: ActiveLineInterface = {}
-  // tabitem数组
-  @Require
-  @Prop
-  tabItem: Object[] = [
-    new TbTabItem({
-      title: '资料库0',
-      icon: null
-    }),
-    new TbTabItem({
-      title: '资料库1',
-      icon: null
-    }),
-  ]
   // 高亮类型
-  private tabStyle: CustomTabstyle = CustomTabstyle.LINE
+  private tabStyle: SilkTabStyle = SilkTabStyle.LINE
   // 记录滚动盒子的宽度
   private scrollWidth: number = 0
+  // 接收传递的tab点击事件
+  tabClick: ($$: SilkTabsTarBarInterface, event: ClickEvent) => void = ($$, event) => {
+  }
+
+  // 给父组件一个方法 通知父组件 索引更新了（若将currentIndex进行双向绑定 则很多无需使用的地方都要写多余的代码）
+  toMessageParent() {
+    this.initActive()
+  }
 
   // 默认tab项
   @Builder
-  tarBarItem($$: CustomTabsTarBarParameter): void {
-    Text(($$.item as TbTabItem).title)
+  tarBarItem($$: SilkTabsTarBarParameter): void {
+    Text(($$.item as SilkTabItem).title)
       .fontSize(15)
       .fontColor($$.currentIndex === $$.index ? $r('app.color.base_font_color3') : $r('app.color.base_font_color6'))
       .fontWeight($$.currentIndex === $$.index ? 500 : 400)
@@ -122,11 +124,13 @@ export struct CustomTabs {
 
   // 初始化高亮标志的偏移和宽度
   initActive() {
-    if (this.tabItemWidth.length === 0) return;
+    if (this.tabItemWidth.length === 0) {
+      return;
+    }
     const arr = this.tabItemWidth.filter((item: number) => item !== null && item !== undefined)
     if (arr.length === this.tabItem.length) {
 
-      if (this.tabStyle === CustomTabstyle.BACKGROUND) {
+      if (this.tabStyle === SilkTabStyle.BACKGROUND) {
         // tab完全显示完成后设置
         if (this.currentIndex === 0) {
           this.moveLeft = 0
@@ -136,12 +140,13 @@ export struct CustomTabs {
             .reduce((pre: number, next: number) => pre + next, 0)
           this.moveWidth = this.tabItemWidth[this.currentIndex]
         }
-      } else if (this.tabStyle === CustomTabstyle.LINE) {
+      } else if (this.tabStyle === SilkTabStyle.LINE) {
         if (this.currentIndex === 0) {
           this.moveLeft = this.tabItemWidth[0] / 2 - (this._line.width as number) / 2
         } else {
           this.moveLeft = this.tabItemWidth.slice(0, this.currentIndex)
-            .reduce((pre: number, next: number) => pre + next, 0) + this.tabItemWidth[this.currentIndex] / 2 - (this._line.width as number) / 2
+            .reduce((pre: number, next: number) => pre + next, 0) + this.tabItemWidth[this.currentIndex] / 2 -
+            (this._line.width as number) / 2
         }
       }
 
@@ -158,16 +163,16 @@ export struct CustomTabs {
     // 如果是行 计算偏移量
     let offsetX = 0
     // 行 和 背景色的计算不一样
-    if (this.tabStyle === CustomTabstyle.LINE) {
+    if (this.tabStyle === SilkTabStyle.LINE) {
       // 行
-      offsetX = leftW + (this.tabItemWidth[targetIndex] -(this._line.width as number)) / 2
+      offsetX = leftW + (this.tabItemWidth[targetIndex] - (this._line.width as number)) / 2
     } else {
       // 背景色
       offsetX = leftW
     }
     // 如是背景色 计算宽度
     let activeWidth = 0
-    if (this.tabStyle === CustomTabstyle.BACKGROUND) {
+    if (this.tabStyle === SilkTabStyle.BACKGROUND) {
       activeWidth = this.tabItemWidth[targetIndex]
     }
     console.log(`shuzu:${JSON.stringify(this.tabItemWidth)}---${leftW} -- ${activeWidth}`)
@@ -196,7 +201,8 @@ export struct CustomTabs {
       //   // 自己隐藏 后一个显示 向后滑动
       //   step = this.tabItemWidth.slice(0, this.currentIndex)?.reduce((pre: number, next: number) => pre + next, 0) || 0
       // }
-      step = this.tabItemWidth.slice(0, this.currentIndex).reduce((pre: number, next: number) => pre + next, 0) + this.tabItemWidth[this.currentIndex] / 2 - this.swiperWidth / 2
+      step = this.tabItemWidth.slice(0, this.currentIndex).reduce((pre: number, next: number) => pre + next, 0) +
+        this.tabItemWidth[this.currentIndex] / 2 - this.swiperWidth / 2
       this.scrollController.scrollTo({
         xOffset: step,
         yOffset: 0,
@@ -210,7 +216,7 @@ export struct CustomTabs {
 
   aboutToAppear(): void {
     // 初始化下划线样式
-    if (this.tabStyle === CustomTabstyle.LINE) {
+    if (this.tabStyle === SilkTabStyle.LINE) {
       const obj: ActiveLineInterface = {}
       obj.width = this.line.width || 7.5
       obj.stroke = this.line.stroke || 4
@@ -218,10 +224,9 @@ export struct CustomTabs {
       this._line = obj
     }
   }
-  @State
-  showToastFlag: boolean = false
+
   build() {
-    Stack({ alignContent: Alignment.Top }){
+    Stack({ alignContent: Alignment.Top }) {
       // 内容
       Swiper(this.controller) {
         this.content()
@@ -239,7 +244,9 @@ export struct CustomTabs {
       .onChange(this.changeIndex)
       .onGestureSwipe((index: number, extraInfo: SwiperAnimationEvent) => {
         this.activeDuration = 0
-        if (this.swiperWidth === 0) return;
+        if (this.swiperWidth === 0) {
+          return;
+        }
         // 计算宽和偏移
         // currentOffset > 0 向右滑。 < 0 向左滑
         // 计算比例
@@ -250,19 +257,23 @@ export struct CustomTabs {
         } else {
           leftW = this.tabItemWidth.slice(0, index).reduce((pre: number, next: number) => pre + next, 0)
         }
-        if (this.tabStyle === CustomTabstyle.LINE) {
+        if (this.tabStyle === SilkTabStyle.LINE) {
           if (proper > 0) {
-            this.moveLeft = leftW + (this.tabItemWidth[index - 1] - (this._line.width as number)) / 2 + this.tabItemWidth[index] * (1 - proper)
+            this.moveLeft = leftW + (this.tabItemWidth[index - 1] - (this._line.width as number)) / 2 +
+              this.tabItemWidth[index] * (1 - proper)
           } else {
-            this.moveLeft = leftW + (this.tabItemWidth[index] - (this._line.width as number)) / 2 + this.tabItemWidth[index + 1] * (-proper)
+            this.moveLeft = leftW + (this.tabItemWidth[index] - (this._line.width as number)) / 2 +
+              this.tabItemWidth[index + 1] * (-proper)
           }
         } else {
           if (proper > 0) {
             this.moveLeft = leftW + this.tabItemWidth[index] * (1 - proper)
-            this.moveWidth = this.tabItemWidth[index - 1] + (this.tabItemWidth[index] - this.tabItemWidth[index - 1]) * proper
+            this.moveWidth =
+              this.tabItemWidth[index - 1] + (this.tabItemWidth[index] - this.tabItemWidth[index - 1]) * proper
           } else {
             this.moveLeft = leftW + this.tabItemWidth[index] * (-proper)
-            this.moveWidth = this.tabItemWidth[index] + (this.tabItemWidth[index +  1] - this.tabItemWidth[index]) * (-proper)
+            this.moveWidth =
+              this.tabItemWidth[index] + (this.tabItemWidth[index +  1] - this.tabItemWidth[index]) * (-proper)
           }
         }
       })
@@ -278,12 +289,14 @@ export struct CustomTabs {
       .padding({
         top: this.barHeight
       })
+
       this.TbTabHeader()
     }
   }
+
   @Builder
-  TbTabHeader () {
-    Column(){
+  TbTabHeader() {
+    Column() {
       // 顶部导航
       Row() {
         if (this.leftBuild) {
@@ -291,8 +304,10 @@ export struct CustomTabs {
         }
         Scroll(this.scrollController) {
           Row() {
-            Stack({ alignContent: this.tabStyle === CustomTabstyle.BACKGROUND ? Alignment.Start : Alignment.BottomStart }) {
-              if (this.tabStyle === CustomTabstyle.BACKGROUND) {
+            Stack({
+              alignContent: this.tabStyle === SilkTabStyle.BACKGROUND ? Alignment.Start : Alignment.BottomStart
+            }) {
+              if (this.tabStyle === SilkTabStyle.BACKGROUND) {
                 Text('')
                   .width(this.moveWidth)
                   .height('100%')
@@ -307,7 +322,7 @@ export struct CustomTabs {
                     curve: Curve.EaseInOut
                   })
                   .zIndex(this.bgcZIndex)
-              } else if (this.tabStyle === CustomTabstyle.LINE ) {
+              } else if (this.tabStyle === SilkTabStyle.LINE) {
                 Divider()
                   .lineCap(LineCapStyle.Round)
                   .strokeWidth(this._line.stroke)
@@ -381,6 +396,7 @@ export struct CustomTabs {
       .padding(this.barPadding)
       .backgroundColor(this.barBgc)
       .justifyContent(FlexAlign.Start)
+
       if (this.subTabBar) {
         this.subTabBar()
       }
@@ -396,21 +412,23 @@ export struct CustomTabs {
 
       // this.showToastFlag = true
     })
-    .bindContentCover(this.showToastFlag, this.ToastBuilder(this.tabAreaObject), { modalTransition: ModalTransition.NONE })
+    .bindContentCover(this.showToastFlag, this.ToastBuilder(this.tabAreaObject),
+      { modalTransition: ModalTransition.NONE })
 
   }
 
   @Builder
-  ToastBuilder (props: PopupProps) {
-    Column(){
-      Column(){
+  ToastBuilder(props: PopupProps) {
+    Column() {
+      Column() {
 
       }
       .width('100%')
       .height(props.poy)
       .backgroundColor('rgba(0,0,0,0.8)')
       .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
-      Column(){
+
+      Column() {
         Text('测试')
           .fontColor(Color.White)
       }
@@ -421,6 +439,7 @@ export struct CustomTabs {
       .width('100%')
       .height(props.heightV)
       .backgroundColor(Color.Transparent)
+
       Column()
         .width('100%')
         .layoutWeight(1)
@@ -433,43 +452,15 @@ export struct CustomTabs {
   }
 }
 
-interface PopupProps{
+interface PopupProps {
   widthV: number
   heightV: number
   pox: number
   poy: number
 }
-@Component
-struct TbTabPopupComp {
-  @Prop
-  props: PopupProps
-  build() {
-    Column(){
-      Column(){
-
-      }
-      .width('100%')
-      .height(this.props.poy)
-      .backgroundColor('rgba(0,0,0,0.8)')
-      Column(){
-
-      }
-      .width('100%')
-      .height(this.props.heightV)
-      .backgroundColor(Color.Transparent)
-      Column()
-        .width('100%')
-        .layoutWeight(1)
-        .backgroundColor('rgba(0,0,0,0.8)')
-    }
-    .width('100%')
-    .height('100%')
-    // .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
-  }
-}
 
 @Component
-export struct TbTabContent {
+export struct SilkTabContent {
   @BuilderParam
   children: () => void
 
@@ -483,46 +474,24 @@ export struct TbTabContent {
 }
 
 // item builder
-export interface CustomTabsTarBarInterface {
+export interface SilkTabsTarBarInterface {
   item: Object
   index: number
   currentIndex: number
 }
 
-export class CustomTabsTarBarParameter implements CustomTabsTarBarInterface {
-  item: Object = new TbTabItem({} as TbTabItemInterface)
+export class SilkTabsTarBarParameter implements SilkTabsTarBarInterface {
+  item: Object = new SilkTabItem({} as SilkTabItemInterface)
   index: number = 0
   currentIndex: number = 0
 
-  constructor(model: CustomTabsTarBarInterface) {
+  constructor(model: SilkTabsTarBarInterface) {
     this.item = model.item
     this.index = model.index
     this.currentIndex = model.currentIndex
   }
 }
 
-export interface TbTabItemInterface {
-  title: string
-  icon: ResourceStr | null
-}
-
-export class TbTabItem implements TbTabItemInterface {
-  title: string = ''
-  icon: ResourceStr | null = null
-
-  constructor(model: TbTabItemInterface) {
-    this.title = model.title
-    this.icon = model.icon
-  }
-
-  // children: PropertyDecorator
-}
-
-export enum CustomTabstyle {
-  NONE,
-  LINE,
-  BACKGROUND
-}
 
 // 计算active的位置和宽度 返回值
 interface GetTbTabbarLeftAndWidth {

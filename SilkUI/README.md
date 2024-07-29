@@ -8,7 +8,7 @@ ohpm install silk_ui
 
 # 基础组件
 
-## CustomPopup 抽屉
+## SilkPopup 抽屉
 
 1.介绍
 
@@ -17,7 +17,7 @@ ohpm install silk_ui
 2.引入
 
 ```arkTS
-import { CustomPopup } from "silk_ui"
+import { SilkPopup } from "silk_ui"
 ```
 
 3.使用
@@ -29,7 +29,7 @@ import { CustomPopup } from "silk_ui"
    `该组件可放置于build函数或者@Builder函数内部任意合法位置，不影响其布局`
 
    ```arkTS
-   CustomPopup({
+   SilkPopup({
      show: this.showPopupCenter
    }) {
      Column(){
@@ -45,7 +45,7 @@ import { CustomPopup } from "silk_ui"
    `该参数非状态变量`
 
    ```arkTS
-   CustomPopup({
+   SilkPopup({
       show: this.showPopupCenter,
       showPosition: 'left'
    }) {
@@ -94,7 +94,7 @@ import { CustomPopup } from "silk_ui"
 
    仅此一个 推荐使用尾随闭包方式传递
 
-## DropDownMenu 下拉菜单
+## SilkDropDownMenu 下拉菜单
 
 1.介绍
 
@@ -102,7 +102,7 @@ import { CustomPopup } from "silk_ui"
 2.引入
 
 ```arkTS
-import { DropDownMenu } from "silk_ui"
+import { SilkDropDownMenu } from "silk_ui"
 ```
 
 3.使用
@@ -114,7 +114,7 @@ import { DropDownMenu } from "silk_ui"
    `通过options参数设置下拉菜单的选项，options为数组，数组元素为对象，对象包含text和value两个属性 导出了DropDownMenuItemInterface接口`
 
    ```arkTS
-   import { DropDownMenu, DropDownMenuItemInterface } from '@ohos/ui_component'
+   import { SilkDropDownMenu, SilkDropDownMenuItemInterface } from '@ohos/ui_component'
       @State
       value: number = 0
       @State
@@ -130,7 +130,7 @@ import { DropDownMenu } from "silk_ui"
       }]
   
   
-   DropDownMenu({
+   SilkDropDownMenu({
       value: this.value,
       options: this.list,
    })
@@ -160,7 +160,7 @@ import { DropDownMenu } from "silk_ui"
      this.menuFlag = flag
    }
   
-   DropDownMenu({
+   SilkDropDownMenu({
      value: this.value,
      text: this.text,
      menuFlag: this.menuFlag,
@@ -215,15 +215,22 @@ import { DropDownMenu } from "silk_ui"
 | hasOverlay             | 是否有遮罩                        | boolean                     | true                           |
 | @Prop disabled         | 是否禁用                         | boolean                     | false                          |
 
-## CustomToast 对话框
+## SilkToast 对话框
 
 1.介绍
 
 `对话框组件。用于弹出对话框 采用函数式调用。有success error warn toast四个方法`
+项目中使用时 首先在entryability.ets中的 onWindowStageCreate生命周期内的
+windowStage.loadContent回调中执行下面这行代码。避免组件创建时没有uicontext 导致显示错误
+
+```
+windowStage.getMainWindowSync().getUIContext().runScopedTask(() => SilkToast.init(this.context))
+```
+
 2.引入
 
 ```arkTS
-import { CustomToast } from "silk_ui"
+import { SilkToast } from "silk_ui"
 ```
 
 3.使用
@@ -231,13 +238,13 @@ import { CustomToast } from "silk_ui"
 1. 基础用法
 
    ```arkTS
-   CustomToast.success('成功')
+   SilkToast.success('成功')
    ```
 
     2. 自定义用法
 
        ```arkTS
-       CustomToast.success({
+       SilkToast.success({
          message: '标题',
          duration: 1000,
          showIcon: true,
@@ -256,7 +263,7 @@ import { CustomToast } from "silk_ui"
 | icon         | 自定义图标   | ResourceStr                     | -        |
 | showPosition | 展示位置    | _'top' \| 'bottom' \| 'center'_ | 'center' |
 
-## CustomList 列表
+## SilkList 列表
 
 1.介绍
 
@@ -264,13 +271,13 @@ import { CustomToast } from "silk_ui"
 2.引入
 
 ```arkTS
-import { CustomList } from "silk_ui"
+import { SilkList } from "silk_ui"
 ```
 
 3.使用
 
    ```arkTS
-   CustomList({
+   SilkList({
       dataSource: this.list,
       finished: this.finished,
       onLoad: () => this.load(),
@@ -296,3 +303,179 @@ import { CustomList } from "silk_ui"
 | offsetValue            | 列表底部偏移量 触发加载   | number                                  | 80                                                    |
 | openRefresh            | 是否开启下拉刷新       | boolean                                 | true                                                  |
 | openAutoLoad           | 是否开启自动加载       | boolean                                 | true                                                  |
+
+## SilkDialog 弹框
+
+1.介绍
+
+`弹框组件。`
+2.引入
+
+```arkTS
+import { SilkDialog } from "silk_ui"
+```
+
+3.使用
+
+   ```arkTS
+   SilkDialog({
+      show: this.show,
+      title: '弹框',
+      message: '内容'
+   })
+   ```
+4.API
+
+| 参数                          | 说明          | 类型                                                  | 默认值                     |
+|-----------------------------|-------------|-----------------------------------------------------|-------------------------|
+| @Link show                  | 是否展示弹框      | boolean                                             | false                   |
+| title                       | 弹框标题 无参则无标题 | ResourceStr                                         | ''                      |
+| widthValue                  | 弹框宽度        | Length                                              | '80%'                       | 
+| message                     | 弹框内容        | ResourceStr                                         | ''                      |
+| messageAlign                | 内容对齐方式      | 'left' \| 'right'                       \| 'center' | 'center'                |
+| theme                       | 按钮类型 参照vant | 'round-button' \| 'default'                         | 'default'               |
+| round                       | 弹框圆角        | Length                                              | 16                      |
+| bgcColor                    | 弹框背景色       | ResourceColor                                       | '#fff'                  |
+| showConfirm                 | 是否展示确认按钮    | boolean                                             | true                    |
+| showCancel                  | 是否展示取消按钮    | boolean                                             | false                   |
+| confirmText                 | 确定按钮文本      | ResourceStr                                         | 确定                      |
+| cancelText                  | 取消按钮文本      | ResourceStr                                         | 取消                      |
+| confirmColor                | 确认按钮文本颜色    | ResourceColor                                       | '#1989fa'               |
+| cancelColor                 | 取消按钮颜色      | ResourceColor                                       | '#333'                  |
+| confirmBgColor              | 确认按钮背景色     | ResourceColor                                       | Color.Transparent       |
+| cancelBgColor               | 取消按钮背景色     | ResourceColor                                       | Color.Transparent       |
+| confirmFontSize             | 确认按钮文本大小    | Length                                              | 16                      |
+| cancelFontSize              | 取消按钮文本大小    | Length                                              | 16                      |
+| @Prop confirmButtonDisabled | 确认按钮禁用状态    | boolean                                             | false                   |
+| @Prop cancelButtonDisabled  | 取消按钮禁用状态    | boolean                                             | false                   |
+| showOverlay                 | 是否展示遮罩      | boolean                                             | true                    |
+| overlayColor                | 遮罩颜色        | ResourceColor                                       | '#b3000000'             |
+| close_on_pop_state          | 页面切换时是否关闭   | boolean                                             | true                    |
+| onConfirm                   | 确认按钮回调      | () => void                                          | () => this.show = false |
+| onCancel                    | 取消按钮回调      | () => void                                          | () => this.show = false |
+
+5. 使用函数方法调用
+   ```arkTS
+   import {ShowSilkDialog, ShowSilkConfirmDialog} from 'silk_ui'
+   ```
+6. 全局重置默认配置
+ ```arkTS
+   import {setDialogDefaultOptions, resetDialogDefaultOptions} from 'silk_ui'
+   ```
+## SilkUpload 图片上传
+1.介绍
+
+`图片上传组件。`
+2.引入
+
+```arkTS
+import { SilkUpload } from "silk_ui"
+```
+3.使用
+   ```arkTS
+   SilkUpload({
+       images: this.images,
+       hasEdit: true,
+       maxNumber: this.maxLength,
+       uploadUrl: ``,
+       props: new Object({
+           module: 'mp'
+        }),
+       success: this.success,
+       hasCrop: true,
+       cropFunction: (uri: string, callback: (uri: string) => void) => this.uploadCrop(uri, callback)
+   })
+   ```
+4.API
+
+| 参数                          | 说明                    | 类型                        | 默认值               |
+|-----------------------------|-----------------------|---------------------------|-------------------|
+| @Link images                | 图片列表                  | string[]                  | []                |
+| rows                       | 多张时 宫格布局列数            | number                    | 0                 |
+| uploadUrl                  | 上传地址                  | string                    | -                 |
+| props                     | 上传额外参数                | object                    | new Object()      |
+| hasEdit                | 是否可长按排序 (多图)          | boolean                   | true              |
+| hasCrop                       | 是否需要裁剪                | boolean                   | false             |
+| icon                       | 上传区域图标地址              | ResourceStr               | ''                |
+| maxNumber                    | 最大上传数量                | number                    | 1                 |
+| proportion                 | 图片比例                  | number                    | 1                 |
+| accept                  | 接受的文件类型               | 'img' \| 'video' \| 'all' | 'img'             |
+| hasRemove                 | 是否可删除                 | boolean                   | true              |
+| hasPreview                  | 是否可预览                 | boolean                   | true              |
+| children                | 默认占位组件                | Builder                   | -                 |
+| refresh                 | 重新上传组件                | Builder                   | -                 |
+| refreshPosition              | 重新上传按钮位置              | 'top_right' \| 'center' \| 'bottom'             | 'bottom'       |
+| success               | 上传成功回调 ，从接口返回值中获取图片地址 | (data: object) => string             |(data) => JSON.stringify(data) |
+| cropFunction             | 裁剪方法 需要返回裁剪后的沙箱路径 用于上传.参数是cache下的路径 返回值也必须是              | (uri: string, callback: (data: string) => void) => void                    | (uri, callback) => {callback(uri)}                |
+
+## SilkImageCrop 图片裁剪
+1.介绍
+
+`图片裁剪组件。`
+2.引入
+
+```arkTS
+import { SilkImageCrop } from "silk_ui"
+```
+3.使用
+   ```arkTS
+   @Builder
+  CropComp() {
+    Column() {
+      SilkImageCrop({
+        status: this.showCrop,
+        uri: this.cropUri,
+        proportion: 16 / 9,
+        type: 'rectangle',
+        callback: (uri: string) => this.cropCallback(uri)
+      })
+    }
+    .width('100%')
+    .height('100%')
+  }
+   ```
+```arkTS
+// 通过全屏模态页面进入裁剪
+ .bindContentCover(this.showCrop, this.CropComp(), {
+        transition: TransitionEffect.move(TransitionEdge.BOTTOM).animation({ duration: 300 })
+      })
+```
+4.API
+
+| 参数              | 说明                                          | 类型                                                      | 默认值                                |
+|-----------------|---------------------------------------------|---------------------------------------------------------|------------------------------------|
+| @Link status    | 裁剪页面展示                                      | boolean                                                 | -                                  |
+| @Prop uri       | 原图路径 （沙箱路径）                                 | string                                                  | ''                              |
+| proportion       | 裁剪比例                                        | number                                                  | 1                                  |
+| type           | 裁剪形状 圆形还是矩形                                 | 'circle' \| 'rectangle'                                 | 'rectangle'                       |
+| callback         | 裁剪回调 参数是裁剪后图片的沙箱路径                          | (filename: string) => void                                                 | (_filename) => {}                               |
+
+## SilkImagePreview 图片预览
+1.介绍
+
+`图片预览组件。`
+2.引入
+
+```arkTS
+import { PreviewComp，showSilkImagePreview } from "silk_ui"
+```
+3.使用
+   ```arkTS
+   // 方法调用 图片列表 索引
+   showSilkImagePreview(this.images, index)
+   ```
+
+4.API 
+```c
+@CustomDialog
+@Component
+struct SilkImagePreview {}
+```
+
+| 参数           | 说明                 | 类型                         | 默认值               |
+|--------------|--------------------|----------------------------|-------------------|
+| @Prop images | 图片列表               | Array<string>              | []                |
+| @Prop index  | 索引                 | number                     | 0                 |
+
+## SilkTabBar tab页签栏
+## SilkCollapse 折叠面板

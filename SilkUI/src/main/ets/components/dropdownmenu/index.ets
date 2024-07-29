@@ -1,11 +1,11 @@
 @Component
-export struct DropDownMenu {
+export struct SilkDropDownMenu {
   @Link
   value: string | number
   @Prop
   text: string = ''
   @Prop
-  options: DropDownMenuItemInterface[] = []
+  options: SilkDropDownMenuItemInterface[] = []
   @BuilderParam
   default: () => void
   // 菜单显示方向
@@ -129,7 +129,7 @@ export struct DropDownMenu {
     if (this.options.length) {
       Scroll(){
         Column(){
-          ForEach(this.options, (item: DropDownMenuItemInterface, index: number) => {
+          ForEach(this.options, (item: SilkDropDownMenuItemInterface, index: number) => {
             this.CustomDropDownMenuItem(item, index !== this.options.length - 1)
           })
         }
@@ -153,7 +153,7 @@ export struct DropDownMenu {
     }
   }
   @Builder
-  CustomDropDownMenuItem (props: DropDownMenuItemInterface, hasBorder: boolean) {
+  CustomDropDownMenuItem (props: SilkDropDownMenuItemInterface, hasBorder: boolean) {
     Column(){
       Row(){
         Text(props.text)
@@ -192,7 +192,7 @@ export struct DropDownMenu {
 
   }
 }
-const defaultProps: DropDownMenuProps = {
+const defaultProps: SilkDropDownMenuProps = {
   active_color: $r('app.color.base_color'),
   overlay_color: $r('app.color.overlay_bg'),
   direction: 'down',
@@ -202,6 +202,7 @@ const defaultProps: DropDownMenuProps = {
   close_on_click_overlay: true,
 }
 @CustomDialog
+@Component
 struct DropDownMenuDialog {
   controller: CustomDialogController
   @BuilderParam
@@ -212,7 +213,7 @@ struct DropDownMenuDialog {
   @Link
   isClose: boolean
 
-  props: DropDownMenuProps = defaultProps
+  props: SilkDropDownMenuProps = defaultProps
   build() {
     Column(){
       if (this.props.direction === 'down') {
@@ -311,12 +312,12 @@ struct DropDownMenuDialog {
     }
   }
 }
-export interface DropDownMenuItemInterface {
+export interface SilkDropDownMenuItemInterface {
   text: string
   value: number | string
 }
 // 下拉菜单参数
-interface DropDownMenuProps {
+interface SilkDropDownMenuProps {
   active_color: ResourceColor
   overlay_color: ResourceColor
   direction: 'down' | 'up'

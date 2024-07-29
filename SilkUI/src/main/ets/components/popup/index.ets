@@ -1,7 +1,7 @@
-import { window } from '@kit.ArkUI'
-import observer from '@ohos.arkui.observer';
+import { window } from '@kit.ArkUI';
+
 @Component
-export struct CustomPopup {
+export struct SilkPopup {
   // 控制弹框是否展示
   @Link
   @Watch('updateShow')
@@ -34,7 +34,7 @@ export struct CustomPopup {
   @BuilderParam
   default: () => void = this.content
   controller: CustomDialogController = new CustomDialogController({
-    builder: CustomDialogComp({
+    builder: DialogComp({
       props: {
         showOverlay: this.showOverlay,
         showPosition: this.showPosition,
@@ -59,13 +59,14 @@ export struct CustomPopup {
     closeAnimation: { duration: 0 },
     maskColor: Color.Transparent,
     alignment: this.getDialogAlignment(),
-    onWillDismiss:(dismissDialogAction: DismissDialogAction)=> {
+    onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info("reason=" + JSON.stringify(dismissDialogAction.reason))
       console.log("dialog onWillDismiss")
       if (dismissDialogAction.reason == DismissReason.TOUCH_OUTSIDE) {
         dismissDialogAction.dismiss()
       }
-    }
+    },
+    autoCancel: this.close_on_click_overlay
   })
 
   getDialogAlignment(): DialogAlignment {
@@ -114,15 +115,19 @@ export struct CustomPopup {
       this.showHandler()
       if (this.close_on_pop_state) {
         // 页面变化时关闭弹框
-        this.getUIContext().getUIObserver().on('navDestinationSwitch',  () => this.callback())
+        this.getUIContext().getUIObserver().on('navDestinationUpdate', () => this.callback())
       }
     } else {
       this.closeHandler()
       if (this.close_on_pop_state) {
         // 页面变化时关闭弹框
-        this.getUIContext().getUIObserver().off('navDestinationSwitch', () => this.callback())
+        this.getUIContext().getUIObserver().off('navDestinationUpdate', () => this.callback())
       }
     }
+  }
+
+  PopupChange() {
+    (() => this.callback())()
   }
 
   showHandler() {
@@ -147,15 +152,16 @@ export struct CustomPopup {
     this.click_overlay()
     this.closeHandler()
   }
-  callback (): void{
-  // console.info(`navigation page switched, switchInfo: ${}`);
+
+  callback(): void {
+    // console.info(`navigation page switched, switchInfo: ${}`);
     this.show = false
-};
+  };
 
   aboutToAppear(): void {
     if (this.showPosition === 'center') {
       this.controller = new CustomDialogController({
-        builder: CustomDialogCompCenter({
+        builder: DialogCompCenter({
           round: this.round,
           children: this.default
         }),
@@ -165,7 +171,8 @@ export struct CustomPopup {
         isModal: this.showOverlay,
         maskColor: this.overlayColor,
         cancel: this.defaultClose,
-        alignment: DialogAlignment.Center
+        alignment: DialogAlignment.Center,
+        autoCancel: this.close_on_click_overlay
       })
     }
 
@@ -176,7 +183,7 @@ export struct CustomPopup {
   }
 }
 
-const defaultProps: CustomDialogCompProps = {
+const defaultProps: SilkDialogCompProps = {
   showOverlay: true,
   showPosition: 'center',
   overlayColor: $r('app.color.overlay_bg'),
@@ -191,9 +198,10 @@ const defaultProps: CustomDialogCompProps = {
 
 
 @CustomDialog
-struct CustomDialogComp {
+@Component
+struct DialogComp {
   controller: CustomDialogController
-  props: CustomDialogCompProps = defaultProps
+  props: SilkDialogCompProps = defaultProps
   @BuilderParam
   children: () => void
   @State
@@ -235,8 +243,10 @@ struct CustomDialogComp {
                 .aspectRatio(1)
                 .fillColor('#c8c9cc')
                 .offset({
-                  x: this.props.close_icon_position === 'top-left' || this.props.close_icon_position === 'bottom-left' ? 16 : -16,
-                  y: this.props.close_icon_position === 'top-left' || this.props.close_icon_position === 'top-right' ? 16 : -16
+                  x: this.props.close_icon_position === 'top-left' || this.props.close_icon_position === 'bottom-left' ?
+                    16 : -16,
+                  y: this.props.close_icon_position === 'top-left' || this.props.close_icon_position === 'top-right' ?
+                    16 : -16
                 })
                 .onClick(() => {
                   this.props.closeHandler && this.props.closeHandler()
@@ -245,12 +255,17 @@ struct CustomDialogComp {
             this.children()
           }
           .contentStyle()
+          // 阻止点击弹出框触发遮罩的点击关闭事件（当子元素未绑定点击事件时 点击子元素会触发父元素的点击。若子元素绑定了点击 则只触发子的点击）
+          .onClick(() => {
+          })
         } else {
           Column() {
             this.children()
           }
           .height('100%')
           .contentStyle()
+          .onClick(() => {
+          })
         }
       }
     }
@@ -261,7 +276,9 @@ struct CustomDialogComp {
     .alignItems(this.getAlignItems())
     .opacity(this.isClose ? 0 : 1)
     .onClick(() => {
-      this.isClose = true
+      if (this.props.close_on_click_overlay) {
+        this.isClose = true
+      }
     })
     .animation({
       duration: this.isClose ? this.props.duration : 0,
@@ -400,7 +417,7 @@ struct CustomDialogComp {
 }
 
 @CustomDialog
-struct CustomDialogCompCenter {
+struct DialogCompCenter {
   controller: CustomDialogController
   round: Length = 16
   @BuilderParam
@@ -419,7 +436,7 @@ struct CustomDialogCompCenter {
   }
 }
 
-interface CustomDialogCompProps {
+interface SilkDialogCompProps {
   showOverlay: boolean
   showPosition: 'top' | 'bottom' | 'left' | 'right' | 'center'
   overlayColor: ResourceColor

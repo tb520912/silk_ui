@@ -35,6 +35,14 @@
     {
       "name": "base_bg_color",
       "value": "#fafafa"
+    },
+    {
+      "name": "primary",
+      "value": "#ff9800"
+    },
+    {
+      "name": "darkGray",
+      "value": "#444444"
     }
   ]
 }

@@ -2,11 +2,11 @@
 ## [V1.0.0]2024-04-14
 ### 新增
 1. 初始化项目
-2. 添加CustomToast组件
-3. 添加CustomPopup组件
-4. 添加CustomList组件
-5. 添加CustomTabs组件
-6. 添加DropDownMenu组件
+2. 添加SilkToast组件
+3. 添加SilkPopup组件
+4. 添加SilkList组件
+5. 添加SilkTabs组件
+6. 添加SilkDropDownMenu组件
 ## [V1.0.1]2024-04-15
 ### 版本号不一致导致审核失败-修复
 ## [V1.0.2]2024-04-19
