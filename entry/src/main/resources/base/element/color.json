@@ -3,6 +3,18 @@
     {
       "name": "start_window_background",
       "value": "#FFFFFF"
+    },
+    {
+      "name": "vandocbackground",
+      "value": "#eff2f5"
+    },
+    {
+      "name": "vandoctextcolor2",
+      "value": "#323233"
+    },
+    {
+      "name": "vandoctextcolor4",
+      "value": "#969799"
     }
   ]
 }

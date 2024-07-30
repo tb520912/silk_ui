@@ -8,6 +8,8 @@
     "pages/PopupPage",
     "pages/SelectPage",
     "pages/TabBarPage",
-    "pages/ToastPage"
+    "pages/ToastPage",
+    "pages/Index",
+    "pages/TestPage"
   ]
 }

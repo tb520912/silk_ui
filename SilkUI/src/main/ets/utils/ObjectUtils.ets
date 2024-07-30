@@ -5,13 +5,13 @@ export class ObjectUtils {
     } else {
       const obj = args[0]
       const arr = args.slice(1)
-      const keys = Object.keys(args[1])
-      if (!keys.length) {
-        throw new Error('不支持空对象参数')
-      }
       if (arr.length) {
         for (let index = 0; index < arr.length; index++) {
           const element = arr[index];
+          const keys = Object.keys(element)
+          if (!keys.length) {
+            throw new Error('不支持空对象参数')
+          }
           keys.forEach((key: string) => {
             obj[key] = element[key] || obj[key]
           })
