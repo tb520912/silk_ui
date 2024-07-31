@@ -3,7 +3,6 @@
  */
 import { SilkCollapseController } from './controller'
 import { SilkCollapseToggleController } from './toggleController'
-import { JSON } from '@kit.ArkTS'
 
 @Component
 export struct SilkCollapse {
@@ -19,6 +18,11 @@ export struct SilkCollapse {
   @Provide({ allowOverride: 'silkCollapseController'})
   @Watch('change')
   silkCollapseController: SilkCollapseController = new SilkCollapseController([])
+  @Provide
+  paddingValue: Padding = {
+    left: 16,
+    right: 16
+  }
   change () {
     this.activeNames = this.silkCollapseController.activeNames
   }
@@ -29,7 +33,7 @@ export struct SilkCollapse {
     }
   }
   build() {
-    this.children()
+      this.children()
   }
 }
 

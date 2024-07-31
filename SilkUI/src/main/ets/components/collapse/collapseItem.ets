@@ -8,6 +8,8 @@ const DEFAULT_PROPS: SilkCollapseProps = {
 }
 @Component
 export struct SilkCollapseItem {
+  @Consume
+  paddingValue: Padding
   // 展开状态
   @Consume("silkCollapseController")
   @Watch('change')
@@ -46,8 +48,9 @@ export struct SilkCollapseItem {
     Column() {
       Row() {
           Text(this.props.title)
-            .fontSize(14)
-            .fontColor('#323232')
+            .fontSize($r('app.float.font_size_md'))
+            .fontColor($r('app.color.text_color'))
+            .lineHeight($r('app.float.cell_line_height'))
             .maxLines(1)
             .textOverflow({
               overflow: TextOverflow.Ellipsis
@@ -61,16 +64,18 @@ export struct SilkCollapseItem {
               .textOverflow({
                 overflow: TextOverflow.Ellipsis
               })
-              .fontSize(14)
-              .fontColor('#969799')
+              .fontSize($r('app.float.font_size_md'))
+              .fontColor($r('app.color.text_color_2'))
           }
           if (this.props.showIcon !== null && this.props.showIcon !== false) {
-            Image(this.props.icon ? this.props.icon : $r('app.media.ic_public_arrow_up'))
+            Image(this.props.icon ? this.props.icon : $r('app.media.arrow'))
               .width(16)
               .aspectRatio(1)
               .rotate({
-                angle: this.collapseStatus ? 0 : 180
+                angle: this.props.icon ? this.collapseStatus ? 180 : 0 : this.collapseStatus ? -90 : 90
               })
+              .fillColor($r('app.color.gray_6'))
+
           }
         }
         .justifyContent(FlexAlign.End)
@@ -83,9 +88,9 @@ export struct SilkCollapseItem {
       .opacity(this.props.disabled ? 0.4 : 1)
       .border({
         width: {
-          top: 0.5
+          bottom: $r('app.float.border_width')
         },
-        color: '#ebedf0'
+        color: $r('app.color.border_color')
       })
       .onClick(() => {
         if (!this.props.disabled && !this.props.isReadonly) {
@@ -96,12 +101,6 @@ export struct SilkCollapseItem {
       Column() {
         this.collapseContent()
       }
-      .border({
-        width: {
-          top: 0.5
-        },
-        color: '#ebedf0'
-      })
       .width('100%')
       // .height(this.collapseStatus ? 'auto' : 0)
       .justifyContent(FlexAlign.Start)
@@ -118,19 +117,18 @@ export struct SilkCollapseItem {
     .width('100%')
     .height(this.collapseStatus ? 'auto' : this.props.size ? this.props.size : 44)
     .clip(true)
-    .padding({
-      left: 16,
-      right: 16
-    })
     .backgroundColor('#fff')
     .animation({
       curve: Curve.EaseInOut,
       duration: 300
     })
+    .padding(this.paddingValue)
   }
 }
 @Component
 export struct SilkCollapseItemCustomTitle {
+  @Consume
+  paddingValue: Padding
   // 展开状态
   @Consume("silkCollapseController")
   @Watch('change')
@@ -178,16 +176,17 @@ export struct SilkCollapseItemCustomTitle {
               .textOverflow({
                 overflow: TextOverflow.Ellipsis
               })
-              .fontSize(14)
-              .fontColor('#969799')
+              .fontSize($r('app.float.font_size_md'))
+              .fontColor($r('app.color.text_color_2'))
           }
           if (this.props.showIcon !== null && this.props.showIcon !== false) {
-            Image(this.props.icon ? this.props.icon : $r('app.media.ic_public_arrow_up'))
+            Image(this.props.icon ? this.props.icon : $r('app.media.arrow'))
               .width(16)
               .aspectRatio(1)
               .rotate({
-                angle: this.collapseStatus ? 0 : 180
+                angle: this.props.icon ? this.collapseStatus ? 180 : 0 : this.collapseStatus ? -90 : 90
               })
+              .fillColor($r('app.color.gray_6'))
           }
         }
         .justifyContent(FlexAlign.End)
@@ -200,9 +199,9 @@ export struct SilkCollapseItemCustomTitle {
       .opacity(this.props.disabled ? 0.4 : 1)
       .border({
         width: {
-          top: 0.5
+          bottom: $r('app.float.border_width')
         },
-        color: '#ebedf0'
+        color: $r('app.color.border_color')
       })
       .onClick(() => {
         if (!this.props.disabled && !this.props.isReadonly) {
@@ -214,12 +213,7 @@ export struct SilkCollapseItemCustomTitle {
        Column() {
          this.collapseContent()
        }
-       .border({
-         width: {
-           top: 0.5
-         },
-         color: '#ebedf0'
-       })
+
        .width('100%')
        // .height(this.collapseStatus ? 'auto' : 0)
        .justifyContent(FlexAlign.Start)
@@ -234,13 +228,10 @@ export struct SilkCollapseItemCustomTitle {
      }
 
     }
+    .padding(this.paddingValue)
     .width('100%')
     .height(this.collapseStatus ? 'auto' : this.props.size ? this.props.size : 44)
     .clip(true)
-    .padding({
-      left: 16,
-      right: 16
-    })
     .backgroundColor('#fff')
     .animation({
       curve: Curve.EaseInOut,
