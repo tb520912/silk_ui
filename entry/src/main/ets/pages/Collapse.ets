@@ -145,18 +145,25 @@ struct Collapse {
           SilkCollapse({ activeNames: this.accordion, accordion: true, children: this.Children3 })
           Title('全部展开与全部切换')
           SilkCollapse({ activeNames: this.baseActiveNames, children: this.Children1, names: ['1', '2', '3'], silkCollapseToggleController: this.silkCollapseToggleController })
-          Button('全部展开')
-            .onClick(() => {
-              this.silkCollapseToggleController.toggle(true)
-            })
-          Button('全部切换')
-            .onClick(() => {
-              this.silkCollapseToggleController.toggle()
-            })
-          Button('全部折叠')
-            .onClick(() => {
-              this.silkCollapseToggleController.toggle(false)
-            })
+          Row(){
+            Button('全部展开')
+              .onClick(() => {
+                this.silkCollapseToggleController.toggle(true)
+              })
+            Button('全部切换')
+              .onClick(() => {
+                this.silkCollapseToggleController.toggle()
+              })
+            Button('全部折叠')
+              .onClick(() => {
+                this.silkCollapseToggleController.toggle(false)
+              })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceAround)
+          .margin({
+            top: 10
+          })
         }
         .justifyContent(FlexAlign.Start)
       }
