@@ -479,3 +479,28 @@ struct SilkImagePreview {}
 
 ## SilkTabBar tab页签栏
 ## SilkCollapse 折叠面板
+1.介绍
+
+`折叠面板 支持vant的基础/手风琴/禁用/自定义/批量切换`
+2.引入
+
+```arkTS
+import { PreviewComp，showSilkImagePreview } from "silk_ui"
+```
+3.使用
+   ```arkTS
+   // 方法调用 图片列表 索引
+   showSilkImagePreview(this.images, index)
+   ```
+
+4.API
+```c
+@CustomDialog
+@Component
+struct SilkImagePreview {}
+```
+
+| 参数           | 说明                 | 类型                         | 默认值               |
+|--------------|--------------------|----------------------------|-------------------|
+| @Prop images | 图片列表               | Array<string>              | []                |
+| @Prop index  | 索引                 | number                     | 0                 |

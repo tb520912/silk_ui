@@ -2,10 +2,12 @@
  * 折叠面板
  */
 import { SilkCollapseController } from './controller'
+import { SilkCollapseToggleController } from './toggleController'
 import { JSON } from '@kit.ArkTS'
 
 @Component
 export struct SilkCollapse {
+  silkCollapseToggleController: SilkCollapseToggleController = new SilkCollapseToggleController()
   // 展开状态
   @BuilderParam
   children: () => void
@@ -22,6 +24,9 @@ export struct SilkCollapse {
   }
   aboutToAppear(): void {
     this.silkCollapseController = new SilkCollapseController(this.activeNames, this.accordion, this.names)
+    if (this.silkCollapseToggleController && this.names.length) {
+      this.silkCollapseToggleController.toggle = (flag?: boolean) => this.silkCollapseController.toggleAll(flag)
+    }
   }
   build() {
     this.children()

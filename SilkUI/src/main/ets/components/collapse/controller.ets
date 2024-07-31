@@ -39,7 +39,7 @@ export class SilkCollapseController {
       this.activeNames = arr
     }
   }
-  toggleAll (flag?:boolean) {
+  toggleAll (flag?:boolean): void {
     // 手风琴模式不支持一键切换
     if (this.accordion) return;
     if (this.names.length === 0) {

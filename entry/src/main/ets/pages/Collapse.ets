@@ -1,4 +1,5 @@
-import { SilkCollapse, SilkCollapseController, SilkCollapseItem, SilkCollapseItemCustomTitle } from '@ohos/silk_ui';
+import { SilkCollapse, SilkCollapseItem, SilkCollapseItemCustomTitle,
+  SilkCollapseToggleController } from '@ohos/silk_ui';
 import { Nav } from '../view/Nav';
 import { Title } from '../view/Title';
 
@@ -117,37 +118,18 @@ struct Collapse {
       }
     }
   }
+  // 注意 自定义标题时 传入的builder必须时全局的 不能使用局部的builder 否则会崩溃 this指向问题无法解决
   @Builder
   Children3 (): void {
     Column(){
       SilkCollapseItemCustomTitle({
         name: '1',
-        collapseTitle: this.CollapseTitle1,
-        collapseContent: this.CollapseCon
+        collapseTitle: CollapseTitle1,
+        collapseContent: CollapseCon
       })
     }
   }
-  @Builder
-  CollapseTitle1 (): void {
-    Text() {
-      Span('标题1')
-      ImageSpan($r('app.media.ic_public_warn'))
-        .width(12)
-        .aspectRatio(1)
-    }
-  }
-  @Builder
-  CollapseCon (): void {
-    Text('在代码阅读过程中人们说脏话的频率是衡量代码质量的唯一标准')
-      .width('100%')
-      .padding({
-        top: 12,
-        bottom: 12,
-      })
-      .fontSize(14)
-      .fontColor($r('app.color.vandoctextcolor4'))
-      .textAlign(TextAlign.Start)
-  }
+  silkCollapseToggleController: SilkCollapseToggleController = new SilkCollapseToggleController()
   build() {
     Column(){
       Nav('Collapse')
@@ -161,6 +143,20 @@ struct Collapse {
           SilkCollapse({ activeNames: this.accordion, accordion: true, children: this.Children2 })
           Title('自定义标题内容')
           SilkCollapse({ activeNames: this.accordion, accordion: true, children: this.Children3 })
+          Title('全部展开与全部切换')
+          SilkCollapse({ activeNames: this.baseActiveNames, children: this.Children1, names: ['1', '2', '3'], silkCollapseToggleController: this.silkCollapseToggleController })
+          Button('全部展开')
+            .onClick(() => {
+              this.silkCollapseToggleController.toggle(true)
+            })
+          Button('全部切换')
+            .onClick(() => {
+              this.silkCollapseToggleController.toggle()
+            })
+          Button('全部折叠')
+            .onClick(() => {
+              this.silkCollapseToggleController.toggle(false)
+            })
         }
         .justifyContent(FlexAlign.Start)
       }
@@ -173,3 +169,24 @@ struct Collapse {
   }
 }
 
+@Builder
+function CollapseTitle1 (): void {
+  Text() {
+    Span('标题1')
+    ImageSpan($r('app.media.ic_public_warn'))
+      .width(12)
+      .aspectRatio(1)
+  }
+}
+@Builder
+function CollapseCon (): void {
+  Text('在代码阅读过程中人们说脏话的频率是衡量代码质量的唯一标准')
+  .width('100%')
+  .padding({
+    top: 12,
+    bottom: 12,
+  })
+  .fontSize(14)
+  .fontColor($r('app.color.vandoctextcolor4'))
+  .textAlign(TextAlign.Start)
+}
