@@ -222,9 +222,6 @@ export struct SilkList {
 
           // }
         }
-        .border({
-          width: 2
-        })
         .backgroundColor(0x89CFF0)
         .refreshOffset(50)
         .pullToRefresh(true)
