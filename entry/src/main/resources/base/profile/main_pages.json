@@ -10,6 +10,7 @@
     "pages/TabBarPage",
     "pages/ToastPage",
     "pages/Index",
-    "pages/TestPage"
+    "pages/TestPage",
+    "pages/CellPage"
   ]
 }

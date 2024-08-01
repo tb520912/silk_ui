@@ -39,7 +39,7 @@ export struct SilkCollapseItem {
         title: '标题'
       }
     }
-    this.props = ObjectUtils.assign(this.props, DEFAULT_PROPS)
+    this.props = ObjectUtils.assign(DEFAULT_PROPS, this.props)
   }
   change () {
     this.getCollapseStatus()
@@ -155,7 +155,7 @@ export struct SilkCollapseItemCustomTitle {
   }
   aboutToAppear(): void {
     this.getCollapseStatus()
-    this.props = ObjectUtils.assign(this.props, DEFAULT_PROPS)
+    this.props = ObjectUtils.assign(DEFAULT_PROPS, this.props)
   }
   change () {
     this.getCollapseStatus()

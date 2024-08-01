@@ -1,6 +1,10 @@
 export class PageListConstants {
   static list: PageItem[] = [
     {
+      title: '单元格',
+      name: 'CellPage'
+    },
+    {
       title: '折叠面板',
       name: 'Collapse'
     },
