@@ -28,8 +28,6 @@ export default struct RefreshLayout {
       src: $r('app.media.07')
     }
   ]
-@Prop
-heightValue: number
   build() {
     Stack({ alignContent: Alignment.Bottom}) {
       ImageAnimator()
@@ -55,7 +53,7 @@ heightValue: number
     .clip(true)
     .width('100%')
     .backgroundColor($r('app.color.bgc_f6'))
-    .height(this.heightValue)
+    .height('100%')
     .border({
       width: 2
     })
@@ -71,5 +69,6 @@ export enum RefreshStatus {
   Drag, // 下拉中 未触发刷新
   OverDrag, // 下拉中 超过触发距离
   Refresh, // 下拉结束 回到刷新距离 进入刷新状态
+    Error, // 刷新失败
   Done // 刷新结束 返回初始状态
 }

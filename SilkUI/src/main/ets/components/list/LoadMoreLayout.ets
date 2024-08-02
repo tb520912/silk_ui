@@ -25,7 +25,7 @@ export default struct LoadMoreLayout {
       case LoadMoreStatus.Loading:
         return {
           image: $r('app.media.ic_pull_up_load'),
-          text: '正在加载更多数据'
+          text: '正在加载...'
         }
       case LoadMoreStatus.Done:
         return {
@@ -60,9 +60,7 @@ export default struct LoadMoreLayout {
       }
       .clip(true)
       .width('100%')
-      .height(50)
-    } else {
-      Column().height(0)
+      .height('100%')
     }
   }
 }
