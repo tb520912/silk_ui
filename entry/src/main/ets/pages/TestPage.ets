@@ -1,5 +1,5 @@
 // @Entry
-import { PullList } from '@ohos/silk_ui'
+import { SilkGridList } from '@ohos/silk_ui'
 
 // @Component
 // struct TestPage {
@@ -102,14 +102,17 @@ struct TestPage {
   }
   build() {
     Column(){
-      PullList({
+      SilkGridList({
         dataSource: this.list,
         finished: this.finished,
         onLoadMore: () => this.load(),
         onRefresh: () => this.refresh(),
         children: this.children,
-        lanes: 2,
         irregularIndexes: this.irregularIndexes,
+        props: {
+          lanes: 2,
+          hasRefresh: true,
+        }
       })
     }
     .height('100%')

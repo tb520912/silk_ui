@@ -15,11 +15,12 @@
 export class PullToRefreshConfigurator {
   private hasRefresh?: boolean = true; // 是否具有下拉刷新功能
   private hasLoadMore?: boolean = true; // 是否具有上拉加载功能
+  private hasAutoLoad?: boolean = false;
   private maxTranslate?: number = 100; // 可下拉上拉的最大距离
   private sensitivity?: number = 0.7; // 下拉上拉灵敏度
   private listIsPlacement?: boolean = true; // 滑动结束后列表是否归位
   private animDuration?: number = 150; // 滑动结束后，回弹动画执行时间
-  private refreshHeight?: number = 50; // 下拉动画高度
+  private refreshHeight?: number = 80; // 下拉动画高度
   private refreshColor?: string = '#999999'; // 下拉动画颜色
   private refreshBackgroundColor?: ResourceColor = 'rgba(0,0,0,0)'; // 下拉动画区域背景色
   private refreshTextColor?: ResourceColor = '#999999'; // 下拉加载完毕后提示文本的字体颜色

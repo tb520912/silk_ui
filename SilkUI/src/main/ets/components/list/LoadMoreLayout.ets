@@ -1,3 +1,5 @@
+import { SilkListProps } from './SilkListDefaultProp'
+
 interface LoadImageText {
   image: ResourceStr,
   text: ResourceStr
@@ -8,6 +10,7 @@ interface LoadImageText {
 export default struct LoadMoreLayout {
   @Link
   status: LoadMoreStatus
+  props?: SilkListProps
 
   getImageText(): LoadImageText {
     switch (this.status) {
@@ -15,27 +18,32 @@ export default struct LoadMoreLayout {
       case LoadMoreStatus.Drag:
         return {
           image: $r('app.media.ic_pull_up_refresh'),
-          text: '上拉可以加载更多'
+          text: this.props?.loadTextPullUp1 || '上拉可以加载更多'
         }
       case LoadMoreStatus.OverDrag:
         return {
           image: $r('app.media.ic_pull_down_refresh'),
-          text: '松开立即加载更多'
+          text: this.props?.loadTextPullUp2 || '松开立即加载更多'
         }
       case LoadMoreStatus.Loading:
         return {
           image: $r('app.media.ic_pull_up_load'),
-          text: '正在加载...'
+          text: this.props?.loadTextLoading || '正在加载...'
         }
       case LoadMoreStatus.Done:
         return {
           image: '',
-          text: '加载完成'
+          text: this.props?.loadTextDone || '加载完成'
         }
+        case LoadMoreStatus.ERROR:
+          return {
+            image: '',
+            text: this.props?.loadTextError || '加载失败'
+          }
       default:
         return {
           image: '',
-          text: '没有更多了'
+          text: this.props?.no_more || '没有更多了'
         }
     }
   }
@@ -71,5 +79,6 @@ export enum LoadMoreStatus {
   OverDrag, // 上拉中 超过触发距离
   Loading, // 加载中
   Done, // 加载成功
+    ERROR, // 加载失败
   NO_MORE // 没有更多
 }
