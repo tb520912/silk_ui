@@ -13,6 +13,10 @@ export class PageListConstants {
       name: 'Dialog'
     },
     {
+      title: 'loading',
+      name: 'LoadingPage'
+    },
+    {
       title: '下拉菜单',
       name: 'DropdownMenu'
     },

@@ -17,8 +17,12 @@ let contentPaddingDefault: Padding = {
   right: 24,
   bottom: 16
 }
-let circleButtonHeightDefault: number = 38
-let defaultButtonHeightDefault: number = 48
+let contentPaddingDefaultNoTitle: Padding = {
+  top: 26,
+  bottom: 26,
+  left: 24,
+  right: 24
+}
 let defaultProps: SilkDialogProps = {
   title: '',
   titleSize: 16,
@@ -42,21 +46,58 @@ let defaultProps: SilkDialogProps = {
   cancelColor: $r('app.color.base_font_color3'),
   confirmBgColor: Color.Transparent,
   cancelBgColor: Color.Transparent,
+  buttonHeight: 48,
+  linearGradient: undefined,
   confirmFontSize: 16,
   cancelFontSize: 16,
   confirmButtonDisabled: false,
   cancelButtonDisabled: false,
-  buttonHeight: 48,
   hasDivider: true,
   showOverlay: true,
   overlayColor: 'rgba(0,0,0,0.7)',
+  autoCancel: false,
+  beforeClose: undefined,
   // 是否在关闭时或者页面回退时自动关闭
   closeOnPopstate: true,
   headerPadding: headerPaddingDefault,
   contentPadding: contentPaddingDefault,
-  bottomPadding: bottomPaddingDefault
+  bottomPadding: bottomPaddingDefault,
+  transition: undefined,
+  confirm: undefined,
+  cancel: undefined,
+  customButton: undefined,
 }
 
+let RoundButton: SilkDialogButton = {
+  confirmBgColor: '#ee0a24',
+  confirmColor: $r('app.color.van_white'),
+  cancelBgColor: '#ff834f55',
+  cancelColor: $r('app.color.van_white'),
+  buttonHeight: 36,
+  linearGradient: {
+    angle: 90,
+    colors: [
+      ['#ff6034', 0],
+      ['#ee0a24', 1]
+    ]
+  }
+}
+let NormalButton: SilkDialogButton = {
+  confirmColor: '#1989fa',
+  cancelColor: $r('app.color.base_font_color3'),
+  confirmBgColor: Color.Transparent,
+  cancelBgColor: Color.Transparent,
+  buttonHeight: 48,
+
+}
+export interface SilkDialogButton {
+  confirmColor?: ResourceColor
+  cancelColor?: ResourceColor
+  confirmBgColor?: ResourceColor
+  cancelBgColor?: ResourceColor
+  buttonHeight?: Length
+  linearGradient?: LinearGradient
+}
 @Component
 struct SilkDialogFunction {
   // 控制弹框是否展示
@@ -64,9 +105,10 @@ struct SilkDialogFunction {
 
 
   _mounted(props: SilkDialogProps) {
-    props = ObjectUtils.assign<SilkDialogProps>(defaultProps, props)
-    props.buttonHeight =
-      props.buttonHeight || props.theme === 'default' ? defaultButtonHeightDefault : circleButtonHeightDefault
+
+    props = ObjectUtils.assign<SilkDialogProps>(defaultProps, props, {
+      contentPadding: props.title ? contentPaddingDefault : contentPaddingDefaultNoTitle
+    }, (props.theme === 'round-button' ? RoundButton : NormalButton) as SilkDialogProps)
 
     props.confirm = props.confirm || (() => {
       controller?.close()
@@ -101,7 +143,7 @@ struct SilkDialogFunction {
           cancelColor: props.cancelColor,
           confirmBgColor: props.confirmBgColor,
           cancelBgColor: props.cancelBgColor,
-
+          linearGradient: props.linearGradient,
           confirmFontSize: props.confirmFontSize,
           cancelFontSize: props.cancelFontSize,
           confirmButtonDisabled: props.confirmButtonDisabled,
@@ -112,6 +154,7 @@ struct SilkDialogFunction {
           overlayColor: props.overlayColor,
           // 是否在关闭时或者页面回退时自动关闭
           closeOnPopstate: props.closeOnPopstate,
+          beforeClose: props.beforeClose,
           headerPadding: props.headerPadding,
           contentPadding: props.contentPadding,
           bottomPadding: props.bottomPadding,
@@ -121,7 +164,8 @@ struct SilkDialogFunction {
         }
       }),
       alignment: DialogAlignment.Center,
-      customStyle: true
+      customStyle: true,
+      autoCancel: props.autoCancel
     })
     controller?.open()
   }
@@ -173,7 +217,12 @@ struct DialogComp {
   build() {
     Column() {
       this.HeaderBuilder()
-      this.ContentBuilder()
+      Column(){
+        this.ContentBuilder()
+      }
+      .constraintSize({
+        minHeight: !this.props.title ? 104 : undefined
+      })
       this.FooterBuilder()
     }
     .width(this.props.widthValue)
@@ -191,7 +240,7 @@ struct DialogComp {
         .fontWeight(600)
         .lineHeight(24)
         .fontColor(this.props.titleColor)
-        .padding(headerPaddingDefault)
+        .padding(this.props.headerPadding)
         .textAlign(TextAlign.Center)
     }
   }
@@ -204,7 +253,7 @@ struct DialogComp {
       .lineHeight(this.props.messageLineHeight)
       .fontColor(this.props.messageColor)
       .textAlign(this.getContentAlign())
-      .padding(contentPaddingDefault)
+      .padding(this.props.contentPadding)
   }
 
   @Builder
@@ -221,35 +270,49 @@ struct DialogComp {
             .backgroundColor(this.props.customButton?.backgroundColor || this.props.confirmBgColor)
             .fontSize(this.props.customButton?.fontSize || this.props.confirmFontSize)
             .fontColor(this.props.customButton?.fontColor || this.props.confirmColor)
-            .onClick(() => {
+            .onClick(async () => {
+              if (this.props.beforeClose) {
+                await this.props.beforeClose('confirm')
+              }
               this.props.confirm && this.props.confirm()
             })
             .width(this.props.customButton?.width || '100%')
             .height(this.props.customButton?.height || this.props.buttonHeight)
             .borderRadius(this.props.customButton?.borderRadius || 0)
+            .linearGradient(this.props.linearGradient ? this.props.linearGradient : undefined)
         } else {
           Button(this.props.cancelText)
+            .type(ButtonType.Normal)
             .backgroundColor(this.props.cancelBgColor)
             .fontSize(this.props.cancelFontSize)
             .fontColor(this.props.cancelColor)
-            .onClick(() => {
+            .onClick(async () => {
+              if (this.props.beforeClose) {
+                await this.props.beforeClose('cancel')
+              }
               this.props.cancel && this.props.cancel()
             })
             .layoutWeight(1)
-            .height(48)
+            .height(this.props.customButton?.height || this.props.buttonHeight)
             .enabled(!this.props.cancelButtonDisabled)
           Divider()
-            .strokeWidth(1)
+            .vertical(true)
+            .strokeWidth('1px')
             .color('#ebedfo')
+            .height(this.props.customButton?.height || this.props.buttonHeight)
           Button(this.props.confirmText)
+            .type(ButtonType.Normal)
             .backgroundColor(this.props.confirmBgColor)
             .fontSize(this.props.confirmFontSize)
             .fontColor(this.props.confirmColor)
-            .onClick(() => {
+            .onClick(async () => {
+              if (this.props.beforeClose) {
+                await this.props.beforeClose('confirm')
+              }
               this.props.confirm && this.props.confirm()
             })
             .layoutWeight(1)
-            .height(48)
+            .height(this.props.customButton?.height || this.props.buttonHeight)
             .enabled(!this.props.confirmButtonDisabled)
         }
       }
@@ -282,7 +345,7 @@ struct DialogComp {
   }
 }
 
-interface SilkDialogProps {
+interface SilkDialogProps extends SilkDialogButton {
   title?: ResourceStr
   titleSize?: number
   titleColor?: ResourceColor
@@ -312,10 +375,11 @@ interface SilkDialogProps {
   buttonHeight?: Length
   hasDivider?: boolean
   showOverlay?: boolean
+  autoCancel?: boolean // 点击遮罩是否关闭 默认不关
   overlayColor?: ResourceColor
   // 是否在关闭时或者页面回退时自动关闭
   closeOnPopstate?: boolean
-  beforeClose?: () => boolean
+  beforeClose?: (action: 'cancel' | 'confirm') => (boolean | Promise<boolean>)
   transition?: TransitionEffect
   confirm?: () => void
   cancel?: () => void
@@ -365,8 +429,6 @@ export function resetDialogDefaultOptions() {
     right: 24,
     bottom: 16
   }
-  circleButtonHeightDefault = 38
-  defaultButtonHeightDefault = 48
   defaultProps = {
     titleSize: 16,
     titleColor: '#323233',
@@ -402,11 +464,11 @@ export function resetDialogDefaultOptions() {
 }
 
 export function setDialogDefaultOptions(props?: SilkDialogProps, headerPadding?: Padding,
-  contentPadding?: Padding, bottomPadding?: Padding, circleButtonHeight?: number, defaultButtonHeight?: number) {
+  contentPadding?: Padding, bottomPadding?: Padding, RoundButtonCus?: SilkDialogButton, NormalButtonCus?: SilkDialogButton) {
   defaultProps = ObjectUtils.assign<SilkDialogProps>(defaultProps, props || defaultProps)
   headerPaddingDefault = ObjectUtils.assign<Padding>(headerPaddingDefault, headerPadding || headerPaddingDefault)
   contentPaddingDefault = ObjectUtils.assign<Padding>(contentPaddingDefault, contentPadding || contentPaddingDefault)
   bottomPaddingDefault = ObjectUtils.assign<Padding>(bottomPaddingDefault, bottomPadding || bottomPaddingDefault)
-  circleButtonHeightDefault = circleButtonHeight || circleButtonHeightDefault
-  defaultButtonHeightDefault = defaultButtonHeight || defaultButtonHeightDefault
+  RoundButton = RoundButtonCus || RoundButton
+  NormalButton = NormalButtonCus || NormalButton
 }
