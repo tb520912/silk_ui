@@ -58,12 +58,16 @@ export default struct LoadMoreLayout {
               .aspectRatio(1)
           }
           Text(this.getImageText().text)
-            .fontSize(12)
-            .fontColor($r('app.color.base_font_color9'))
+            .fontSize(this.props?.loadTextSize || 12)
+            .fontColor(this.props?.loadTextColor || $r('app.color.base_font_color9'))
         }
         .justifyContent(FlexAlign.Center)
         .width('100%')
-        .height(50)
+        .height('100%')
+        .alignItems(VerticalAlign.Top)
+        .margin({
+          top: 10
+        })
 
       }
       .clip(true)

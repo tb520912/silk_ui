@@ -43,7 +43,7 @@ export const SilkListDefaultProp: SilkListProps = {
   loadImgHeight: 50, // 上拉图片高度
   loadBackgroundColor: 'rgba(0,0,0,0)', // 上拉动画区域背景色
   loadTextColor: '#999999', // 上拉文本的字体颜色
-  loadTextSize: 18, // 上拉文本的字体大小
+  loadTextSize: 12, // 上拉文本的字体大小
   loadTextPullUp1: '上拉可以加载更多', // 上拉1阶段文本
   loadTextPullUp2: '松开立即加载更多', // 上拉2阶段文本
   loadTextDone: '加载完成', // 上拉加载完毕后提示文本
