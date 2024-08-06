@@ -1,11 +1,12 @@
-import { ShowSilkConfirmDialog, ShowSilkDialog, SilkCell, SilkCellGroup } from '@ohos/silk_ui';
+import { ShowSilkConfirmDialog, ShowSilkDialog, SilkCell, SilkCellGroup, SilkDialog } from '@ohos/silk_ui';
 import { Nav } from '../view/Nav';
 import { Title } from '../view/Title';
 
 @Entry
 @Component
 struct Dialog {
-
+  @State
+  showDialog: boolean = false
   build() {
     Column(){
       Nav('Dialog')
@@ -98,6 +99,25 @@ struct Dialog {
               })
           })
           }
+          Title('使用 Dialog 组件')
+          SilkCellGroup({ inset: true }){
+            SilkCell({
+              props: {
+                title: '使用 Dialog 组件',
+                isLink: true
+              }
+            })
+              .onClick(() => {
+                this.showDialog = true
+              })
+          }
+          SilkDialog({
+            show: this.showDialog,
+            showCancel: true,
+            title: '标题',
+            defaultComp: () => this.DialogDefault()
+          })
+
         }
         .justifyContent(FlexAlign.Start)
       }
@@ -107,5 +127,18 @@ struct Dialog {
     }
     .height('100%')
     .width('100%')
+  }
+  @Builder
+  DialogDefault (): void {
+    Column(){
+      Image('https://fastly.jsdelivr.net/npm/@vant/assets/apple-3.jpeg')
+        .width('100%')
+        .height('auto')
+    }
+    .padding({
+      top: 25,
+      left: 20,
+      right: 20
+    })
   }
 }
