@@ -1,5 +1,6 @@
+
 @Component
-export struct SilkDropDownMenu {
+export struct SilkDropdownMenuItem {
   @Link
   value: string | number
   @Prop
@@ -54,7 +55,7 @@ export struct SilkDropDownMenu {
     customStyle: true,
     openAnimation: { duration: 0},
     closeAnimation: { duration: 0},
-    alignment:  this.directionValue === 'down' ? DialogAlignment.Bottom : DialogAlignment.Top
+    alignment: this.directionValue === 'down' ? DialogAlignment.Bottom : DialogAlignment.Top
   })
 
   aboutToAppear(): void {
@@ -149,7 +150,7 @@ export struct SilkDropDownMenu {
         maxHeight: 300
       })
     } else {
-        this.default()
+      this.default()
     }
   }
   @Builder
@@ -192,15 +193,7 @@ export struct SilkDropDownMenu {
 
   }
 }
-const defaultProps: SilkDropDownMenuProps = {
-  active_color: $r('app.color.base_color'),
-  overlay_color: $r('app.color.overlay_bg'),
-  direction: 'down',
-  duration: 300,
-  overlay: true,
-  close_on_click_outside: true,
-  close_on_click_overlay: true,
-}
+
 @CustomDialog
 @Component
 struct DropDownMenuDialog {
@@ -256,7 +249,7 @@ struct DropDownMenuDialog {
           top: 1
         })
         .width('100%')
-        .height('100%')
+        .height(`calc(100% - ${this.scrollTop}vp)`)
         .clip(true)
       } else {
         Stack({ alignContent: Alignment.Bottom }){
@@ -289,21 +282,21 @@ struct DropDownMenuDialog {
           bottom: 1
         })
         .width('100%')
-        .height('100%')
+        .height(this.scrollTop)
         .clip(true)
-        // Column()
-        //   .width('100%')
-        //   .layoutWeight(1)
-        //   .backgroundColor(Color.Transparent)
-        //   .onClick(() => {
-        //     if (this.props.close_on_click_outside) {
-        //       this.isClose = false
-        //     }
-        //   })
+        Column()
+          .width('100%')
+          .height(`calc(100% - ${this.scrollTop}vp)`)
+          .backgroundColor(Color.Transparent)
+          .onClick(() => {
+            if (this.props.close_on_click_outside) {
+              this.isClose = false
+            }
+          })
       }
     }
     .width('100%')
-    .height(this.props.direction === 'down' ? `calc(100% - ${this.scrollTop}vp)` : this.scrollTop)
+    .height('100%')
   }
 
   finished() {
@@ -316,6 +309,15 @@ export interface SilkDropDownMenuItemInterface {
   text: string
   value: number | string
 }
+const defaultProps: SilkDropDownMenuProps = {
+  active_color: $r('app.color.base_color'),
+  overlay_color: $r('app.color.overlay_bg'),
+  direction: 'down',
+  duration: 300,
+  overlay: true,
+  close_on_click_outside: true,
+  close_on_click_overlay: true,
+}
 // 下拉菜单参数
 interface SilkDropDownMenuProps {
   active_color?: ResourceColor
@@ -323,6 +325,6 @@ interface SilkDropDownMenuProps {
   direction?: 'down' | 'up'
   duration?: number
   overlay?: boolean
-  close_on_click_outside: boolean
-  close_on_click_overlay: boolean
+  close_on_click_outside?: boolean
+  close_on_click_overlay?: boolean
 }
