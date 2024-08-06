@@ -5,7 +5,6 @@ import { Title } from '../view/Title';
 @Entry
 @Component
 struct CellPage {
-  @State message: string = 'Hello World';
 
   build() {
     Column(){

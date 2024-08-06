@@ -7,7 +7,7 @@ export class ValueAnimator {
   static currentTimeMillsecond () {
     return systemDateTime.getTime(true)
   }
-
+  public easing: string = 'ease'
   public startValue: number = 0
   public endValue: number = 0
   public duration: number = 0
@@ -22,7 +22,7 @@ export class ValueAnimator {
     if (this._animator === null) {
       this._animator = animator.create({
         duration: 3000,
-        easing: 'ease',
+        easing: this.easing,
         delay: 0,
         fill: 'forwards',
         direction: 'normal',

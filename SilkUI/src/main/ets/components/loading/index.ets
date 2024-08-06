@@ -4,29 +4,58 @@ import { curves } from '@kit.ArkUI';
 @Preview
 @Component
 export struct SilkLoading {
+  type: 'circular' | 'spinner' = 'circular'
+  color: ResourceColor = '#c8c9cc'
+  icon: ResourceStr = ''
+  sizeValue: Length = 30
+  textSize: Length = $r('app.float.font_size_md')
+  text: ResourceStr = ''
+  textColor?: ResourceColor = undefined
+  vertical: boolean = false
+  private fontColorValue: ResourceColor = ''
   @State dasharray: number[] = [1 , 200];
   @State dashOffset: number | string = 0
   @State angle: number = 0;
+  @State angleSpinner: number = 0;
+  @State private loadWidth: number = 0
   uiContext: UIContext | undefined = undefined;
-
   private animator: ValueAnimator | null = null;
-  private animatorColumn: ValueAnimator | null = null;
+  private animatorCircle: ValueAnimator | null = null;
+  private animatorSpinner: ValueAnimator | null = null;
   aboutToAppear() {
-    this.uiContext = this.getUIContext?.();
-    this.animator = new ValueAnimator()
-    this.animator.startValue = 0
-    this.animator.endValue = 1
-    this.animator.duration = 1500
-    this.animator.loops = Infinity
-    this.animator.fillRule = 1
-    this.animator.onUpdate = (value: number) => this.update(value)
-    this.animatorColumn = new ValueAnimator()
-    this.animatorColumn.startValue = 0
-    this.animatorColumn.endValue = 1
-    this.animatorColumn.duration = 2000
-    this.animatorColumn.fillRule = 1
-    this.animatorColumn.loops = Infinity
-    this.animatorColumn.onUpdate = (value: number) => this.updateColumn(value)
+    if (this.color !== '#c8c9cc') {
+      this.fontColorValue = this.color
+    } else if (this.textColor) {
+      this.fontColorValue = this.textColor
+    } else {
+      this.fontColorValue = $r('app.color.text_color_2')
+    }
+    if (this.type === 'circular') {
+      this.uiContext = this.getUIContext?.();
+      this.animator = new ValueAnimator()
+      this.animator.startValue = 0
+      this.animator.endValue = 1
+      this.animator.duration = 1500
+      this.animator.loops = Infinity
+      this.animator.fillRule = 1
+      this.animator.onUpdate = (value: number) => this.update(value)
+      this.animatorCircle = new ValueAnimator()
+      this.animatorCircle.startValue = 0
+      this.animatorCircle.endValue = 1
+      this.animatorCircle.duration = 2000
+      this.animatorCircle.fillRule = 1
+      this.animatorCircle.loops = Infinity
+      this.animatorCircle.onUpdate = (value: number) => this.updateColumn(value)
+    } else {
+      this.animatorSpinner = new ValueAnimator()
+      this.animatorSpinner.startValue = 0
+      this.animatorSpinner.endValue = 12
+      this.animatorSpinner.duration = 800
+      this.animatorSpinner.fillRule = 1
+      this.animatorSpinner.loops = Infinity
+      this.animatorSpinner.easing = 'steps(12, end)'
+      this.animatorSpinner.onUpdate = (value: number) => this.updateSpinner(value)
+    }
   }
   private icu: ICurve = curves.initCurve(Curve.EaseInOut)
   private update (value: number): void {
@@ -44,61 +73,170 @@ export struct SilkLoading {
   private updateColumn (value: number): void {
     this.angle = value * 360
   }
+  private updateSpinner (value: number): void {
+    this.angleSpinner = Math.ceil(value) * 30
+  }
   aboutToDisappear(): void {
     this.animator?.stop()
     this.animator = null
-    this.animatorColumn?.stop()
-    this.animatorColumn = null
+    this.animatorCircle?.stop()
+    this.animatorCircle = null
+    this.animatorSpinner?.stop()
+    this.animatorSpinner = null
   }
   build() {
-    Column(){
+    if (this.vertical) {
       Column(){
-        Circle()
-          .width(30)
-          .height(30)
-          .fill(Color.Transparent)
-          .strokeWidth(3)
-          .strokeLineCap(LineCapStyle.Round)
-          .stroke('#c8c9cc')
-          .strokeDashArray(this.dasharray)
-          .strokeDashOffset(this.dashOffset)
-          .onAppear(() => {
-            this.animator?.start()
+        if (this.type === 'circular') {
+          Column(){
+            if (this.icon) {
+              Image(this.icon)
+                .width('100%')
+                .height('100%')
+                .fillColor(this.color)
+            } else {
+              Circle()
+                .width('100%')
+                .height('100%')
+                .fill(Color.Transparent)
+                .strokeWidth(3)
+                .strokeLineCap(LineCapStyle.Round)
+                .stroke(this.color)
+                .strokeDashArray(this.dasharray)
+                .strokeDashOffset(this.dashOffset)
+                .onAppear(() => {
+                  this.animator?.start()
+                })
+            }
+          }
+          .width(this.sizeValue)
+          .aspectRatio(1)
+          .rotate({
+            angle: this.angle
           })
-      }
-      .width(30)
-      .height(30)
-      .rotate({
-        angle: this.angle
-      })
-      // .backgroundColor(Color.Red)
-      .onAppear(() => {
-        this.animatorColumn?.start()
-      })
-      Column(){
-        Stack({ alignContent: Alignment.Top}){
-          ForEach(new Array(12).fill(0), (item: number, index: number) => {
-            Row()
-              .width(2)
-              .height(7.5)
-              .rotate({
-                angle: index * 30,
-                centerX: '50%',
-                centerY: 15,
+          .onAppear(() => {
+            this.animatorCircle?.start()
+          })
+        } else {
+          Stack({ alignContent: Alignment.Top}){
+            if (this.icon) {
+              Image(this.icon)
+                .width('100%')
+                .height('100%')
+                .fillColor(this.color)
+
+            } else {
+              ForEach(new Array(12).fill(0), (_: number, index: number) => {
+                Row()
+                  .width(2)
+                  .height('25%')
+                  .rotate({
+                    angle: index * 30,
+                    centerX: '50%',
+                    centerY: this.loadWidth / 2,
+                  })
+                  .backgroundColor(this.color)
+                  .opacity(1 - 0.0625 * index)
               })
-              .backgroundColor('#c8c9cc')
-              .opacity(1 - 0.0625 * index)
+            }
+          }
+          .onAreaChange((_: Area, area: Area) => {
+            this.loadWidth = area.width as number
+          })
+          .width(this.sizeValue)
+          .aspectRatio(1)
+          .rotate({
+            angle: this.angleSpinner
+          })
+          .onAppear(() => {
+            this.animatorSpinner?.start()
           })
         }
-        .width(30)
-        .height(30)
-        .rotate({
-          angle: this.angle
-        })
-        // .backgroundColor(Color.Red)
-        .onAppear(() => {
-          this.animatorColumn?.start()
-        })
+        // 加载文案
+        if (this.text) {
+          Text(this.text)
+            .fontSize(this.textSize)
+            .fontColor(this.fontColorValue)
+            .margin({
+              left: this.vertical ? 0 : 8,
+              top: this.vertical ? 8 : 0
+            })
+        }
+      }
+    } else {
+      Row(){
+        if (this.type === 'circular') {
+          Column(){
+            if (this.icon) {
+              Image(this.icon)
+                .width('100%')
+                .height('100%')
+            } else {
+              Circle()
+                .width('100%')
+                .height('100%')
+                .fill(Color.Transparent)
+                .strokeWidth(3)
+                .strokeLineCap(LineCapStyle.Round)
+                .stroke(this.color)
+                .strokeDashArray(this.dasharray)
+                .strokeDashOffset(this.dashOffset)
+                .onAppear(() => {
+                  this.animator?.start()
+                })
+            }
+          }
+          .width(this.sizeValue)
+          .aspectRatio(1)
+          .rotate({
+            angle: this.angle
+          })
+          .onAppear(() => {
+            this.animatorCircle?.start()
+          })
+        } else {
+          Stack({ alignContent: Alignment.Top}){
+            if (this.icon) {
+              Image(this.icon)
+                .width('100%')
+                .height('100%')
+            } else {
+              ForEach(new Array(12).fill(0), (_: number, index: number) => {
+                Row()
+                  .width(2)
+                  .height('25%')
+                  .rotate({
+                    angle: index * 30,
+                    centerX: '50%',
+                    centerY: this.loadWidth / 2,
+                  })
+                  .backgroundColor(this.color)
+                  .opacity(1 - 0.0625 * index)
+              })
+            }
+          }
+          .onAreaChange((_: Area, area: Area) => {
+            this.loadWidth = area.width as number
+          })
+          .width(this.sizeValue)
+          .aspectRatio(1)
+          .rotate({
+            angle: this.angleSpinner
+          })
+          .onAppear(() => {
+            this.animatorSpinner?.start()
+          })
+        }
+        // 加载文案
+        if (this.text) {
+          Text(this.text)
+            .fontSize(this.textSize)
+            .fontColor(this.fontColorValue)
+            .margin({
+              left: this.vertical ? 0 : 8,
+              top: this.vertical ? 8 : 0
+            })
+        }
       }
     }
   }
