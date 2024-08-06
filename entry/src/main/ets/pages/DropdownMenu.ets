@@ -1,4 +1,4 @@
-import { SilkDropDownMenu, SilkDropDownMenuItemInterface } from '@ohos/silk_ui/src/main/ets/components/dropdownmenu';
+import { SilkDropdownMenu, SilkDropdownMenuItemInterface } from '@ohos/silk_ui';
 import { Nav } from '../view/Nav';
 import { Title } from '../view/Title';
 
@@ -6,37 +6,35 @@ import { Title } from '../view/Title';
 @Component
 struct DropdownMenu {
   @State
-  menuValue1: string = ''
+  menu1: number = 0
   @State
-  menu1: boolean = false
-  menu1Options: SilkDropDownMenuItemInterface[] = [
+  menu2: string = '0'
+  options1: SilkDropdownMenuItemInterface[] = [
     {
-      text: '全部商品',
-      value: '0'
-    },
-    {
-      text: '新款商品',
-      value: '1'
-    },
-    {
-      text: '活动商品',
-      value: '2'
-    }
-  ]
-  @State
-  menuValue2: number = 0
-  menu2Options: SilkDropDownMenuItemInterface[] = [
-    {
-      text: '默认排序',
+      text: '选项一',
       value: 0
     },
     {
-      text: '好评排序',
+      text: '选项二',
       value: 1
     },
     {
-      text: '销量排序',
+      text: '选项三',
       value: 2
+    }
+  ]
+  options2: SilkDropdownMenuItemInterface[] = [
+    {
+      text: '选项一',
+      value: '0'
+    },
+    {
+      text: '选项二',
+      value: '1'
+    },
+    {
+      text: '选项三',
+      value: '2'
     }
   ]
   build() {
@@ -46,13 +44,13 @@ struct DropdownMenu {
         Column() {
           Title('基础用法')
           Row(){
-            SilkDropDownMenu({
-              value: this.menuValue1,
-              options: this.menu1Options
+            SilkDropdownMenu({
+              value: this.menu1,
+              options: this.options1
             })
-            SilkDropDownMenu({
-              value: this.menuValue2,
-              options: this.menu2Options
+            SilkDropdownMenu({
+              value: this.menu2,
+              options: this.options2
             })
           }
           .width('100%')

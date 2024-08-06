@@ -35,5 +35,8 @@ export function Nav (title: string) {
         router.back()
       })
   }
-  .height(56)
+  .height(`calc(56vp + ${AppStorage.get<number>('STATUS_BAR_HEIGHT')}vp)`)
+  .padding({
+    top: AppStorage.get<number>('STATUS_BAR_HEIGHT')
+  })
 }
