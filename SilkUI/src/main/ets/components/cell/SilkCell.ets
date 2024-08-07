@@ -3,6 +3,8 @@ import { ObjectUtils } from '../../utils/ObjectUtils'
 const DEFAULT: SilkCellProps = {
   title: '',
   value: '',
+  titleColor: $r('app.color.text_color'),
+  valueColor: $r('app.color.text_color_2'),
   label: undefined,
   size: 'normal',
   icon: undefined,
@@ -64,7 +66,7 @@ export struct SilkCell {
               }
               Text(this.props.title)
                 .fontSize(this.props.size === 'normal' ? $r('app.float.font_size_md') : $r('app.float.font_size_lg'))
-                .fontColor($r('app.color.text_color'))
+                .fontColor(this.props.titleColor)
             }
             .alignItems(VerticalAlign.Center)
             .height($r('app.float.cell_line_height'))
@@ -84,7 +86,7 @@ export struct SilkCell {
             this.customValue()
           } else if (this.props.value) {
             Text(this.props.value)
-              .fontColor($r('app.color.text_color_2'))
+              .fontColor(this.props.valueColor)
               .fontSize($r('app.float.font_size_md'))
           }
           if (this.customRightIcon) {
@@ -144,6 +146,8 @@ export struct SilkCell {
 interface SilkCellProps {
   title?: ResourceStr
   value?: ResourceStr
+  titleColor?: ResourceColor
+  valueColor?: ResourceColor
   backgroundColor?: ResourceColor
   height?: Length
   label?: ResourceStr
