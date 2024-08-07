@@ -1,6 +1,7 @@
 export * from './src/main/ets/components/list/index'
 export * from './src/main/ets/components/toast/index'
 export * from './src/main/ets/components/dropdownmenu/index'
+export * from './src/main/ets/components/dropdownmenu/dropdownMenuItem'
 export * from './src/main/ets/components/popup/index'
 export * from './src/main/ets/components/tabs/index'
 export {  SilkDialog, resetDialogDefaultOptions, setDialogDefaultOptions, SilkDialogButton, SilkDialogProps } from './src/main/ets/components/dialog/index'

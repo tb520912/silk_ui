@@ -1,6 +1,8 @@
 // @Component
 import { util } from '@kit.ArkTS'
 import { window } from '@kit.ArkUI'
+import { SilkCell } from '../cell/SilkCell'
+import { SilkDropdownMenuController } from './controller'
 
 // export struct SilkDropDownMenu {
 //   @Link
@@ -330,224 +332,38 @@ import { window } from '@kit.ArkUI'
 //   close_on_click_overlay: boolean
 // }
 
-@Preview
 @Component
 export struct SilkDropdownMenu {
-  // 参数
-    @Link
-    value: string | number
-    @Prop
-    text: string = ''
-    @Prop
-    options: SilkDropdownMenuItemInterface[] = []
-    @BuilderParam
-    default: () => void
-    // 菜单显示方向
-    directionValue: 'down' | 'up' = 'down'
-    round: Length = 0
-    // 动画时间
-    duration: number = 300
-    // 选中先颜色
-    active_color: ResourceColor = $r('app.color.base_color')
-    // 蒙版颜色
-    overlay_color: ResourceColor = $r('app.color.overlay_bg')
-    // 是否展示遮罩
-    hasOverlay: boolean = true
-    // 是否禁用
-    @Prop
-    disabled: boolean = false
-    // 点击外部元素是否关闭
-    close_on_click_outside: boolean = true
-    // 点击遮罩是否关闭
-    close_on_click_overlay: boolean = true
-  private _id: string = util.generateRandomUUID()
+  bgc: ResourceColor = Color.White
+  @BuilderParam
+  children: () => void
   @State
-  menuFlag: boolean = false
-  @State
-  private scrollTop: number = 0
-  @State
-  private menuHeight: number = 0
-  @State
-  private windowHeight: number = 0
-  private getWindowProperties() {
-    const windowName = this.getUIContext().getWindowName()
-    if (windowName) {
-      const win = window.findWindow(windowName)
-      this.windowHeight = win.getWindowProperties().drawableRect.height
-    }
-  }
-  aboutToAppear(): void {
-    this.getWindowProperties()
-  }
+  private _h: number = 0
   build() {
-    RelativeContainer(){
-        Text(this.text)
-          .fontSize(15)
-          .fontColor(this.menuFlag ? this.active_color : '#323233')
-          .lineHeight(22)
-          .constraintSize({
-            maxWidth: '70%'
-          })
-          .maxLines(1)
-          .textOverflow({
-            overflow: TextOverflow.Ellipsis
-          })
-          .id('drop_menu_text' + this._id)
-          .alignRules({
-            center: { anchor: '__container__', align: VerticalAlign.Center },
-            middle: { anchor: '__container__', align: HorizontalAlign.Center }
-          })
-      // 三角
-            Row()
-              .margin({
-                top: this.menuFlag ? 1 : -4
-              })
-              .width(0)
-              .height(0)
-              .border({
-                width: 3,
-                color: {
-                  top: Color.Transparent,
-                  right: Color.Transparent,
-                  bottom: this.menuFlag ? this.active_color : '#dcdee0',
-                  left: this.menuFlag ? this.active_color : '#dcdee0'
-                }
-              })
-              .rotate({
-                angle: this.menuFlag ? 135 : 315
-              })
-              .id('drop_menu_arrow' + this._id)
-              .alignRules({
-                left: { anchor: 'drop_menu_text' + this._id, align: HorizontalAlign.End },
-                center: { anchor: '__container__', align: VerticalAlign.Center }
-              })
-              .offset({
-                x: 4
-              })
-      // 内容区
-      // 透明遮罩
-      Column()
-        .width('100%')
-        .height(this.menuHeight)
-        .backgroundColor(Color.Transparent)
-        .id('drop_menu_mask' + this._id)
-        .alignRules({
-          middle: { anchor: '__container__', align: HorizontalAlign.Center },
-          bottom: { anchor: '__container__', align: VerticalAlign.Top }
-        })
-
-      // 遮罩层
-      Column(){
-        Column(){
-          this.DropDownMenuContent()
-        }
-        .constraintSize({
-          maxHeight: `calc(0.7 * ${this.windowHeight}px - 0.7 * ${this.scrollTop}vp})`
-        })
-        .transition(TransitionEffect.translate({
-          y: '-100%'
-        }).animation({ duration: this.duration }))
-      }
-      .backgroundColor($r('app.color.overlay_bg'))
-      .width('100%')
-      .height(`calc(${this.windowHeight}px - ${this.scrollTop}vp)`)
-      .id('drop_menu_content' + this._id)
-      .alignRules({
-        middle: { anchor: '__container__', align: HorizontalAlign.Center },
-        top: { anchor: '__container__', align: VerticalAlign.Bottom }
-      })
-    }
-    .height(48)
-    .width(180)
-        .onAreaChange((_: Area, area: Area) => {
-          this.scrollTop = (area.globalPosition.y as number)
-          if (this.directionValue === 'down') {
-            this.scrollTop += (area.height as number)
-          }
-          this.menuHeight = area.height as number
-        })
-    .onClick(() => {
-      this.menuFlag = !this.menuFlag
-    })
-  }
-    // 默认列表项
-    @Builder
-    DefaultBuilder (): void {
-      Column(){
-        Text('组件内容区')
-      }
-    }
-    // 默认弹框内容
-    @Builder
-    DropDownMenuContent (): void {
-      if (this.options.length) {
-        Scroll(){
-          Column(){
-            ForEach(this.options, (item: SilkDropdownMenuItemInterface, index: number) => {
-              this.CustomDropDownMenuItem(item, index !== this.options.length - 1)
-            })
-          }
-          .backgroundColor(Color.White)
-
-        }
-        .borderRadius({
-          topLeft: this.directionValue === 'down' ? 0 : 16,
-          topRight: this.directionValue === 'down' ? 0 : 16,
-          bottomLeft: this.directionValue === 'up' ? 0 : 16,
-          bottomRight: this.directionValue === 'up' ? 0 : 16
-        })
-        .clip(true)
-        .scrollBar(BarState.Off)
-        .width('100%')
-        .constraintSize({
-          maxHeight: 300
-        })
-      } else {
-          this.default()
-      }
-    }
-    @Builder
-    CustomDropDownMenuItem (props: SilkDropdownMenuItemInterface, hasBorder: boolean) {
-      Column(){
+      Stack(){
         Row(){
-          Text(props.text)
-            .fontSize(14)
-            .lineHeight(24)
-            .fontColor(props.value === this.value ? $r('app.color.base_color') : Color.Black)
-          Image($r('app.media.ic_public_ok'))
-            .width(16)
-            .aspectRatio(1)
-            .fillColor($r('app.color.base_color'))
-            .visibility(props.value === this.value ? Visibility.Visible : Visibility.Hidden)
+          this.children()
         }
         .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
+        .backgroundColor(this.bgc)
+        .onAreaChange((_: Area, area: Area) => {
+          this._h = area.height as number
+        })
+        if (this._h) {
+          Column()
+            .width('100%')
+            .height(this._h)
+            .shadow({
+              offsetX: 0,
+              offsetY: 2,
+              radius: 12,
+              color: 'rgba(100, 101, 102, 0.12)'
+            })
+            .hitTestBehavior(HitTestMode.Transparent)
+        }
       }
       .width('100%')
-      .padding({
-        top: 10,
-        bottom: 10,
-        left: 16,
-        right: 16
-      })
-      .border({
-        width: {
-          bottom: hasBorder ? 1 : 0,
-        },
-        color: $r('app.color.border_color')
-      })
-      .onClick(() => {
-        this.value = props.value
-        this.text = props.text
-        this.menuFlag = false
-      })
+  }
 
-
-
-    }
 }
 
-export interface SilkDropdownMenuItemInterface {
-  text: string
-  value: number | string
-}
