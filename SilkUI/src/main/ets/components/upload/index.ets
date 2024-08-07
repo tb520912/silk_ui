@@ -187,8 +187,8 @@ export struct SilkUpload {
       }
       .supportAnimation(true)
       .columnsTemplate(this.getTemplate(this.maxNumber > 1 ? 3 : 1, 'row'))
-      .rowsGap(this.rows || this.maxNumber > 1 ? 10 : 0)
-      .columnsGap(this.maxNumber / (this.rows || (this.maxNumber > 1 ? 3 : 1)) > 1 ? 10 : 0)
+      .columnsGap(this.rows || this.maxNumber > 1 ? 10 : 0)
+      .rowsGap(this.maxNumber / (this.rows || (this.maxNumber > 1 ? 3 : 1)) > 1 ? 10 : 0)
       .editMode(this.hasEdit)
       .scrollBar(BarState.Off)
       .onItemDragStart((event: ItemDragInfo, itemIndex: number) => {
@@ -238,7 +238,7 @@ export struct SilkUpload {
   @Builder
   NoContainer() {
     RelativeContainer() {
-      Image($r('app.media.ic_public_camera'))
+      Image($r('app.media.photograph'))
         .width(24)
         .height(24)
         .id('silk_upload_icon')
@@ -486,7 +486,7 @@ enum SilkUploadStatus {
 }
 
 @Observed
-class SilkUploadItem implements SilkUploadItemInterface {
+export class SilkUploadItem implements SilkUploadItemInterface {
   filePath: string
   url?: string
   status?: SilkUploadStatus
