@@ -14,13 +14,11 @@ export struct SilkDropdownMenuItem {
   title: string = ''
   @Prop
   options: SilkDropdownMenuItemInterface[] = []
-  @BuilderParam
-  default: () => void
   // 菜单显示方向
   directionValue: 'down' | 'up' = 'down'
   round: Length = 0
   // 动画时间
-  duration: number = 300
+  duration: number = 200
   // 选中先颜色
   active_color: ResourceColor = $r('app.color.base_color')
   // 蒙版颜色
@@ -49,6 +47,14 @@ export struct SilkDropdownMenuItem {
   @State
   private offsetLeft: number = 0
 
+  // 当使用尾随闭包时 传递通用属性
+  heightValue?: Length
+  layoutWeightValue?: number
+  widthValue?: Length
+  zIndexValue?: number
+  @BuilderParam
+  CustomContent: () => void
+
   private getWindowProperties() {
     const windowName = this.getUIContext().getWindowName()
     if (windowName) {
@@ -76,7 +82,7 @@ export struct SilkDropdownMenuItem {
   aboutToAppear(): void {
     this.getWindowProperties()
     this.setDefaultText()
-    this.controller
+    this.controller.append(this._id)
   }
 
   build() {
@@ -89,9 +95,9 @@ export struct SilkDropdownMenuItem {
           maxWidth: '70%'
         })
         .maxLines(1)
-        .textOverflow({
-          overflow: TextOverflow.Ellipsis
-        })
+        // .textOverflow({
+        //   overflow: TextOverflow.
+        // })
         .id('drop_menu_text' + this._id)
         .alignRules({
           center: { anchor: '__container__', align: VerticalAlign.Center },
@@ -194,8 +200,9 @@ export struct SilkDropdownMenuItem {
       }
     }
     .zIndex(10)
-    .height('100%')
-    .width('100%')
+    .height(this.heightValue || '100%')
+    .width(this.widthValue || '100%')
+    .layoutWeight(this.layoutWeightValue || undefined)
     .onAreaChange((_: Area, area: Area) => {
       this.scrollTop = (area.globalPosition.y as number)
       if (this.directionValue === 'down') {
@@ -264,7 +271,7 @@ export struct SilkDropdownMenuItem {
         maxHeight: '100%'
       })
     } else {
-      this.default()
+      this.CustomContent()
     }
   }
 
