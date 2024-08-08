@@ -1,10 +1,12 @@
 import { Context } from '@kit.AbilityKit'
+import { SilkLoading } from '../loading'
 
 export enum MessageDialogType {
   WARN = 'warn',
   ERROR = 'error',
   SUCCESS = 'success',
-  TOAST = 'toast'
+  TOAST = 'toast',
+  LOADING = 'loading'
 }
 
 interface MessageDialogProps {
@@ -72,7 +74,7 @@ struct ToastDialog {
       this._mounted(props as MessageDialogProps, MessageDialogType.TOAST)
     } else {
       this._mounted({
-        message: props as ResourceStr
+        message: props as ResourceStr,
       }, MessageDialogType.TOAST)
     }
   }
@@ -87,6 +89,15 @@ struct ToastDialog {
     }
   }
 
+  loading(props: MessageDialogProps | ResourceStr) {
+    if (Object.keys(props).includes('message')) {
+      this._mounted(props as MessageDialogProps, MessageDialogType.LOADING)
+    } else {
+      this._mounted({
+        message: props as ResourceStr
+      }, MessageDialogType.LOADING)
+    }
+  }
   getAlign(showPosition: 'top' | 'center' | 'bottom'): DialogAlignment {
     switch (showPosition) {
       case 'top':
@@ -116,11 +127,11 @@ struct CusDialog {
     }
     switch (this.type) {
       case MessageDialogType.WARN:
-        return $r('app.media.ic_public_warn')
+        return $r('app.media.warning')
       case MessageDialogType.ERROR:
-        return $r('app.media.ic_public_error')
+        return $r('app.media.fail')
       case MessageDialogType.SUCCESS:
-        return $r('app.media.ic_public_success')
+        return $r('app.media.success')
       case MessageDialogType.TOAST:
         return ''
       default:
@@ -139,21 +150,37 @@ struct CusDialog {
   @Builder
   SuccessBuilder(): void {
     Column({ space: 8 }) {
-      if (this.showIcon) {
+      if (this.showIcon && this.getImage()) {
         Image(this.getImage())
           .width(36)
           .height(36)
+          .fillColor('#fff')
+      }
+      if (this.type === MessageDialogType.LOADING) {
+        Row(){
+          SilkLoading({
+            color: '#fff',
+            sizeValue: 30
+          })
+        }
+        .padding(4)
       }
       Text(this.message)
         .fontSize(14)
         .fontColor($r('app.color.white'))
     }
-    .padding(16)
+    .padding({
+      top: ((this.showIcon && this.getImage()) || this.type === MessageDialogType.LOADING )? 16 : 10,
+      bottom: ((this.showIcon && this.getImage()) || this.type === MessageDialogType.LOADING ) ? 16 : 10,
+      left: ((this.showIcon && this.getImage()) || this.type === MessageDialogType.LOADING ) ? 16 : 12,
+      right: ((this.showIcon && this.getImage()) || this.type === MessageDialogType.LOADING ) ? 16 : 12
+    })
     .borderRadius(8)
-    .backgroundColor('#ff858282')
+    .backgroundColor($r('app.color.overlay_bg'))
     .constraintSize({
-      minWidth: '33.33%',
+      minWidth: 96,
       maxWidth: '72%',
+      minHeight: this.showIcon && this.getImage() ? 88 : 0,
       maxHeight: '70%'
     })
   }
@@ -199,6 +226,12 @@ export class SilkToast {
       ToastClass.init()
     }
     ToastClass.ToastComponent?.warn(props)
+  }
+  static loading(props: MessageDialogProps | ResourceStr) {
+    if (!ToastClass.ToastComponent || !inited) {
+      ToastClass.init()
+    }
+    ToastClass.ToastComponent?.loading(props)
   }
 
   static init(context?: Context) {
