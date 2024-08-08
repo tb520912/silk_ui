@@ -14,9 +14,20 @@ interface MessageDialogProps {
   duration?: number
   showIcon?: boolean
   icon?: ResourceStr
+  loadingType?: 'circular' | 'spinner'
   showPosition?: 'top' | 'center' | 'bottom'
+  wordBreak?: WordBreak,
+  forbidClick?: boolean // 禁止背景点击
 }
+@Observed
+export class ToastDynamicMessage {
+  message: ResourceStr = ''
 
+  constructor(message: ResourceStr) {
+    this.message = message
+  }
+}
+let dynamicMessage = new ToastDynamicMessage('')
 let controller: CustomDialogController | null
 
 @Component
@@ -27,17 +38,28 @@ struct ToastDialog {
         message: props.message,
         showIcon: props.showIcon ?? true,
         icon: props.icon ?? '',
-        type: type
+        type: type,
+        loadingType: props.loadingType,
+        wordBreak: props.wordBreak,
+        duration: props.duration
       }),
       customStyle: true,
-      autoCancel: true,
+      autoCancel: !props.forbidClick,
       alignment: (() => this.getAlign(props.showPosition || 'center'))(),
+      offset: {
+        dy: props.showPosition === 'top' ? '20%' : props.showPosition === 'bottom' ? '-20%' : 0,
+        dx: 0
+      },
       maskColor: Color.Transparent
     })
     controller.open()
-    setTimeout(() => {
-      controller?.close()
-    }, props.duration ?? type === MessageDialogType.ERROR ? 30000 : 3000)
+    if (props.duration === 0) {
+
+    } else {
+      setTimeout(() => {
+        controller?.close()
+      }, props.duration ?? type === MessageDialogType.ERROR ? 30000 : 3000)
+    }
   }
 
   success(props: MessageDialogProps | ResourceStr) {
@@ -48,6 +70,7 @@ struct ToastDialog {
         message: props as ResourceStr
       }, MessageDialogType.SUCCESS)
     }
+
     // if (typeof props === 'string') {
     //   this._mounted({
     //     message: props
@@ -91,8 +114,10 @@ struct ToastDialog {
 
   loading(props: MessageDialogProps | ResourceStr) {
     if (Object.keys(props).includes('message')) {
+      dynamicMessage.message = (props as MessageDialogProps).message
       this._mounted(props as MessageDialogProps, MessageDialogType.LOADING)
     } else {
+      dynamicMessage.message = props as ResourceStr
       this._mounted({
         message: props as ResourceStr
       }, MessageDialogType.LOADING)
@@ -115,12 +140,16 @@ struct ToastDialog {
 
 @CustomDialog
 struct CusDialog {
+  @State
+  dynamicMessage: ToastDynamicMessage = dynamicMessage
   controller: CustomDialogController
   type: MessageDialogType = MessageDialogType.SUCCESS
   showIcon: boolean = true
   icon: ResourceStr = ''
   message: ResourceStr = ''
-
+  loadingType: 'circular' | 'spinner' = 'circular'
+  wordBreak?: WordBreak
+  duration?: number = 3000
   getImage(): ResourceStr {
     if (this.icon) {
       return this.icon
@@ -160,14 +189,17 @@ struct CusDialog {
         Row(){
           SilkLoading({
             color: '#fff',
-            sizeValue: 30
+            sizeValue: 30,
+            type: this.loadingType || 'circular'
           })
         }
         .padding(4)
       }
-      Text(this.message)
+      Text(this.duration === 0 ? this.dynamicMessage.message : this.message)
         .fontSize(14)
         .fontColor($r('app.color.white'))
+        .wordBreak(this.wordBreak)
+        .textAlign(TextAlign.Center)
     }
     .padding({
       top: ((this.showIcon && this.getImage()) || this.type === MessageDialogType.LOADING )? 16 : 10,
@@ -188,7 +220,7 @@ struct CusDialog {
 
 class ToastClass {
   static ToastComponent: ToastDialog | null = null
-
+  dynamicMessage: ToastDynamicMessage | null = null
   static init(context?: Context) {
     if (!getContext() && !context) {
       return;
@@ -227,11 +259,17 @@ export class SilkToast {
     }
     ToastClass.ToastComponent?.warn(props)
   }
-  static loading(props: MessageDialogProps | ResourceStr) {
+  static loading(props: MessageDialogProps | ResourceStr, dynamicMessageObj?: ToastDynamicMessage): ToastDynamicMessage {
+    dynamicMessage = dynamicMessageObj || new ToastDynamicMessage('')
+
     if (!ToastClass.ToastComponent || !inited) {
       ToastClass.init()
     }
-    ToastClass.ToastComponent?.loading(props)
+    ToastClass.ToastComponent!.loading(props)
+    return dynamicMessage
+  }
+  static closeToast () {
+    controller?.close()
   }
 
   static init(context?: Context) {
@@ -239,3 +277,5 @@ export class SilkToast {
     ToastClass.init(context)
   }
 }
+
+
