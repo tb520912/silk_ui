@@ -6,6 +6,7 @@ import { SilkDropdownMenuController } from './controller'
 @Component
 export struct SilkDropdownMenuItem {
   @Link
+  @Watch('change')
   controller: SilkDropdownMenuController
   // 参数
   @Link
@@ -54,6 +55,16 @@ export struct SilkDropdownMenuItem {
   zIndexValue?: number
   @BuilderParam
   CustomContent: () => void
+  dialogController?: CustomDialogController
+  private change () {
+    if (this.controller.id === this._id) {
+      if (this.directionValue === 'down' || this.close_on_click_outside) {
+        this.dialogController?.open()
+      }
+    } else {
+      this.dialogController?.close()
+    }
+  }
 
   private getWindowProperties() {
     const windowName = this.getUIContext().getWindowName()
@@ -133,69 +144,73 @@ export struct SilkDropdownMenuItem {
       // 内容区
       // 透明遮罩
       if (this.showMenu) {
-        Column()
+        if (this.directionValue === 'down' && this.close_on_click_outside) {
+          Column()
+            .width(this.windowWidth)
+            .height(this.scrollTop - this.menuHeight)
+            .backgroundColor(Color.Transparent)
+            .id('drop_menu_mask' + this._id)
+            .alignRules(this.getAlignRules('transparent'))
+            .offset({
+              x: -this.offsetLeft
+            })
+            .onClick(() => {
+              if (this.close_on_click_outside) {
+                this.controller.toggle('')
+              }
+            })
+        }
+
+        if (this.directionValue === 'up') {
+          // 遮罩层
+          Column() {
+            if (this.controller.id === this._id) {
+              Column() {
+                this.DropDownMenuContent()
+              }
+              .id('cccc')
+              .width('100%')
+              .constraintSize({
+                maxHeight: 0.7 * (this.windowHeight - this.scrollTop)
+              })
+              .borderRadius({
+                topLeft: this.round,
+                topRight: this.round,
+                bottomLeft: 0,
+                bottomRight: 0
+              })
+              .clip(true)
+              .alignRules({
+                top: { anchor: 'drop_menu_content' + this._id, align: VerticalAlign.Top }
+              })
+              .transition(TransitionEffect.translate({
+                y: '100%'
+              }).animation({ duration: this.duration }))
+            }
+          }
+          .justifyContent(FlexAlign.End)
+          .clip(true)
+          .backgroundColor(this.hasOverlay ? this.overlay_color : Color.Transparent)
           .width(this.windowWidth)
-          .height(this.scrollTop - this.menuHeight)
-          .backgroundColor(Color.Transparent)
-          .id('drop_menu_mask' + this._id)
-          .alignRules(this.getAlignRules('transparent'))
+          .height(this.scrollTop)
+          .id('drop_menu_content' + this._id)
+          .alignRules(this.getAlignRules('overlay'))
           .offset({
             x: -this.offsetLeft
           })
+          .opacity(this.controller.id === this._id ? 1 : 0)
+          .animation({
+            duration: this.duration,
+            onFinish: () => {
+              this.showMenu = false
+            }
+          })
           .onClick(() => {
-            if (this.close_on_click_outside) {
+            if (this.close_on_click_overlay) {
               this.controller.toggle('')
             }
           })
-
-        // 遮罩层
-        Column() {
-          if (this.controller.id === this._id) {
-            Column() {
-              this.DropDownMenuContent()
-            }
-            .id('cccc')
-            .width('100%')
-            .constraintSize({
-              maxHeight: 0.7 * (this.windowHeight - this.scrollTop)
-            })
-            .borderRadius({
-              topLeft: this.directionValue === 'down' ? 0 : this.round,
-              topRight: this.directionValue === 'down' ? 0 : this.round,
-              bottomLeft: this.directionValue === 'up' ? 0 : this.round,
-              bottomRight: this.directionValue === 'up' ? 0 : this.round,
-            })
-            .clip(true)
-            .alignRules({
-              top: { anchor: 'drop_menu_content' + this._id, align: VerticalAlign.Top }
-            })
-            .transition(TransitionEffect.translate({
-              y: this.directionValue === 'down' ? '-100%' : '100%'
-            }).animation({ duration: this.duration }))
-          }
         }
-        .justifyContent(this.directionValue === 'down' ? FlexAlign.Start : FlexAlign.End)
-        .clip(true)
-        .backgroundColor(this.hasOverlay ? this.overlay_color : Color.Transparent)
-        .width(this.windowWidth)
-        .height(this.windowHeight - this.scrollTop)
-        .id('drop_menu_content' + this._id)
-        .alignRules(this.getAlignRules('overlay'))
-        .offset({
-          x: -this.offsetLeft
-        })
-        .opacity(this.controller.id === this._id ? 1 : 0)
-        .animation({
-          duration: this.duration,
-          onFinish: () => {
-            this.showMenu = false
-          }
-        })
-        .onClick(() => {
-          if (this.close_on_click_overlay) {
-            this.controller.toggle('')
-          }
-        })
 
       }
     }
@@ -210,12 +225,66 @@ export struct SilkDropdownMenuItem {
       }
       this.menuHeight = area.height as number
       this.offsetLeft = area.globalPosition.x as number
+      // 如果是向下弹出 弹出内容是一个dialog 上面蒙版使用定位元素
+      if (this.directionValue === 'down') {
+        this.dialogController = new CustomDialogController({
+          builder: DropDownMenuDialog({
+            context: () => this.DropDownMenuContent(),
+            scrollTop: this.scrollTop,
+            isClose: this.showMenu,
+            silkDropdownController: this.controller,
+            props: {
+              active_color: this.active_color,
+              overlay_color: this.overlay_color,
+              direction: this.directionValue,
+              duration: this.duration,
+              overlay: this.hasOverlay,
+              close_on_click_outside: this.close_on_click_outside,
+              close_on_click_overlay: this.close_on_click_overlay
+            },
+            heightValue: this.windowHeight - this.scrollTop
+          }),
+          maskColor: Color.Transparent,
+          customStyle: true,
+          openAnimation: { duration: 0},
+          closeAnimation: { duration: 0},
+          alignment: DialogAlignment.Bottom,
+          height: this.windowHeight - this.scrollTop,
+          maskRect: {
+            x: 0,
+            y: this.scrollTop,
+            width: '100%',
+            height: this.windowHeight - this.scrollTop
+          }
+        })
+      } else {
+        if (this.close_on_click_outside) {
+          const height = this.windowHeight - this.scrollTop - (area.height as number)
+          this.dialogController = new CustomDialogController({
+            builder: () => this.TransParentDialog(height),
+            maskColor: Color.Transparent,
+            customStyle: true,
+            openAnimation: { duration: 0},
+            closeAnimation: { duration: 0},
+            height,
+            alignment: DialogAlignment.Bottom,
+            maskRect: {
+              x: 0,
+              y: this.scrollTop + (area.height as number),
+              width: '100%',
+              height: height
+            }
+          })
+        }
+      }
+        // 如果是向上弹出 弹出内容是定位元素 下面透明蒙版是弹框
     })
     .onClick(() => {
       if (!this.disabled) {
         if (this.controller.id !== this._id) {
           this.showMenu = true
           this.controller.toggle(this._id)
+
         } else {
           this.controller.toggle('')
         }
@@ -223,7 +292,17 @@ export struct SilkDropdownMenuItem {
 
     })
   }
-
+  // 透明弹框
+  @Builder
+  TransParentDialog (height: number): void {
+    Column()
+      .width('100%')
+      .height(height)
+      .backgroundColor(Color.Transparent)
+      .onClick(() => {
+        this.controller.toggle('')
+      })
+  }
   // 默认列表项
   @Builder
   DefaultBuilder(): void {
@@ -311,6 +390,140 @@ export struct SilkDropdownMenuItem {
       }
     }
   }
+}
+
+const defaultProps: SilkDropdownMenuProps = {
+  active_color: $r('app.color.base_color'),
+  overlay_color: $r('app.color.overlay_bg'),
+  direction: 'down',
+  duration: 300,
+  overlay: true,
+  close_on_click_outside: true,
+  close_on_click_overlay: true,
+}
+@CustomDialog
+@Component
+struct DropDownMenuDialog {
+  controller: CustomDialogController
+  @BuilderParam
+  context: () => void
+  @Prop
+  scrollTop: number = 0
+  @Prop
+  heightValue: number = 0
+
+  @Link
+  isClose: boolean
+  silkDropdownController?: SilkDropdownMenuController
+  props: SilkDropdownMenuProps = defaultProps
+  build() {
+    Column(){
+      if (this.props.direction === 'down') {
+        // Column()
+        //   .width('100%')
+        //   .height(this.scrollTop)
+        //   .backgroundColor(Color.Transparent)
+        //   .onClick(() => {
+        //     if (this.props.close_on_click_outside) {
+        //       this.isClose = false
+        //     }
+        //   })
+        Stack({ alignContent: Alignment.Top }){
+          Column()
+            .width('100%')
+            .height('100%')
+            .backgroundColor(this.props.overlay_color)
+            .onClick(() => {
+              if (this.props.close_on_click_overlay) {
+                this.isClose = false
+              }
+            })
+            .opacity(this.isClose ? 1 : 0)
+            .animation({
+              duration: !this.isClose ? this.props.duration : 0,
+              onFinish: () => this.finished(),
+            })
+          if (this.isClose) {
+            Column(){
+              this.context()
+            }
+            .width('100%')
+            .transition(TransitionEffect.translate({
+              y: '-100%'
+            }).animation({ duration: this.props.duration }))
+          }
+        }
+
+        .padding({
+          top: 1
+        })
+        .width('100%')
+        .layoutWeight(1)
+        .clip(true)
+      } else {
+        Stack({ alignContent: Alignment.Bottom }){
+          Column()
+            .width('100%')
+            .height('100%')
+            .backgroundColor(this.props.overlay_color)
+            .opacity(this.isClose ? 1 : 0)
+            .onClick(() => {
+              if (this.props.close_on_click_overlay) {
+                this.isClose = false
+              }
+            })
+            .animation({
+              duration: !this.isClose ? this.props.duration : 0,
+              onFinish: () => this.finished(),
+            })
+          if (this.isClose) {
+            Column(){
+              this.context()
+            }
+            .width('100%')
+            .transition(TransitionEffect.translate({
+              y: '100%'
+            }).animation({ duration: this.props.duration }))
+          }
+        }
+
+        .padding({
+          bottom: 1
+        })
+        .width('100%')
+        .height(this.scrollTop)
+        .clip(true)
+        // Column()
+        //   .width('100%')
+        //   .layoutWeight(1)
+        //   .backgroundColor(Color.Transparent)
+        //   .onClick(() => {
+        //     if (this.props.close_on_click_outside) {
+        //       this.isClose = false
+        //     }
+        //   })
+      }
+    }
+    .width('100%')
+    .height(this.heightValue)
+  }
+
+  finished() {
+    if (!this.isClose) {
+      this.controller.close()
+      this.silkDropdownController?.toggle('')
+    }
+  }
+}
+// 下拉菜单参数
+interface SilkDropdownMenuProps {
+  active_color: ResourceColor
+  overlay_color: ResourceColor
+  direction: 'down' | 'up'
+  duration: number
+  overlay: boolean
+  close_on_click_outside: boolean
+  close_on_click_overlay: boolean
 }
 
 export interface SilkDropdownMenuItemInterface {
