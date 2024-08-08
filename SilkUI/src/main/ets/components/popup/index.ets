@@ -31,6 +31,29 @@ export struct SilkPopup {
   safe_top: boolean = false
   // 是否避让底部导航栏
   safe_bottom: boolean = false
+  // 关闭前回调 返回true则关闭 返回false可以阻止关闭
+  before_close: () => (boolean | Promise<boolean>) = () => true
+  // 弹出层点击
+  click: () => void = () => {
+  }
+  // 遮罩点击
+  click_overlay: () => void = () => {
+  }
+  // 关闭按钮点击
+  click_close: () => void = () => {
+  }
+  // 显示时立即触发
+  open: () => void = () => {
+  }
+  // 显示时动画结束立即触发
+  opened: () => void = () => {
+  }
+  // 关闭时立即触发
+  close: () => void = () => {
+  }
+  // 关闭时动画结束立即触发
+  closed: () => void = () => {
+  }
   @BuilderParam
   default: () => void = this.content
   controller: CustomDialogController = new CustomDialogController({
@@ -51,7 +74,12 @@ export struct SilkPopup {
         safe_bottom: this.safe_bottom,
         closeHandler: () => this.defaultClose()
       },
+      opened: () => this.opened(),
+      closed: () => this.closed(),
+      close: () => this.close(),
       children: this.default,
+      click_overlay: () => this.click_overlay(),
+      click_close: () => this.click_close()
 
     }),
     customStyle: true,
@@ -91,24 +119,6 @@ export struct SilkPopup {
   content() {
   }
 
-  // 关闭前回调 返回true则关闭 返回false可以阻止关闭
-  before_close: () => (boolean | Promise<boolean>) = () => true
-  // 弹出层点击
-  click: () => void = () => {
-  }
-  // 遮罩点击
-  click_overlay: () => void = () => {
-  }
-  // 关闭按钮点击
-  click_close: () => void = () => {
-  }
-  // 显示时立即触发
-  open: () => void = () => {
-  }
-  // 关闭时立即触发
-  close: () => void = () => {
-  }
-
   // 显示隐藏
   updateShow() {
     if (this.show) {
@@ -118,7 +128,7 @@ export struct SilkPopup {
         this.getUIContext().getUIObserver().on('navDestinationUpdate', () => this.callback())
       }
     } else {
-      this.closeHandler()
+      // this.closeHandler()
       if (this.close_on_pop_state) {
         // 页面变化时关闭弹框
         this.getUIContext().getUIObserver().off('navDestinationUpdate', () => this.callback())
@@ -131,16 +141,20 @@ export struct SilkPopup {
   }
 
   showHandler() {
-    this.controller.open()
     this.open()
+    this.controller.open()
     this.show = true
+    // TODO 升级后 transition可以使用动画完成回调 这个就不需要了
+    setTimeout(() => {
+      this.opened()
+    }, this.duration)
   }
 
   async closeHandler() {
     const res = await this.before_close()
     if (res) {
       this.controller.close()
-      this.close()
+      this.closed()
       this.show = false
     } else {
       this.show = true
@@ -191,7 +205,7 @@ const defaultProps: SilkDialogCompProps = {
   round: 0,
   close_on_pop_state: true,
   close_on_click_overlay: true,
-  close_icon: $r('app.media.ic_public_close'),
+  close_icon: $r('app.media.cross'),
   close_icon_position: 'top-right',
   widthValue: '70%'
 }
@@ -206,12 +220,30 @@ struct DialogComp {
   children: () => void
   @State
   isClose: boolean = false
+
   @State
   safeHeight: AreaParams = {
     top: 0,
     bottom: 0
   }
-
+  // 弹出层点击
+  click: () => void = () => {
+  }
+  // 遮罩点击
+  click_overlay: () => void = () => {
+  }
+  // 关闭按钮点击
+  click_close: () => void = () => {
+  }
+  // 显示时动画结束立即触发
+  opened: () => void = () => {
+  }
+  // 关闭时立即触发
+  close: () => void = () => {
+  }
+  // 关闭时动画结束立即触发
+  closed: () => void = () => {
+  }
   @Styles
   contentStyle() {
     .width(this.getContentWidth())
@@ -249,7 +281,8 @@ struct DialogComp {
                     16 : -16
                 })
                 .onClick(() => {
-                  this.props.closeHandler && this.props.closeHandler()
+                  this.click_close && this.click_close()
+                  this.close()
                 })
             }
             this.children()
@@ -276,12 +309,14 @@ struct DialogComp {
     .alignItems(this.getAlignItems())
     .opacity(this.isClose ? 0 : 1)
     .onClick(() => {
+      this.click_overlay && this.click_overlay()
       if (this.props.close_on_click_overlay) {
+        this.close()
         this.isClose = true
       }
     })
     .animation({
-      duration: this.isClose ? this.props.duration : 0,
+      duration: this.props.duration,
       onFinish: () => this.finished(),
     })
   }
