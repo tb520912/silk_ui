@@ -1,6 +1,6 @@
 import { SilkCell } from '@ohos/silk_ui/src/main/ets/components/cell/SilkCell';
 import { SilkCellGroup } from '@ohos/silk_ui/src/main/ets/components/cell/SilkCellGroup';
-import { ToastDynamicMessage } from '@ohos/silk_ui/src/main/ets/components/toast';
+import { allowMultipleToast, SilkToastComponent } from '@ohos/silk_ui/src/main/ets/components/toast';
 import { SilkToast } from '@ohos/silk_ui/src/main/ets/components/toast';
 import { Nav } from '../view/Nav';
 import { Title } from '../view/Title';
@@ -8,8 +8,12 @@ import { Title } from '../view/Title';
 @Entry
 @Component
 struct ToastPage {
-  @State message: ToastDynamicMessage = new ToastDynamicMessage('');
+  @State
+  show: boolean = false
   aboutToAppear(): void {
+    // 修改为非单例模式 无参或true
+    // allowMultipleToast(true)
+    allowMultipleToast(false)
     SilkToast.init(getContext())
   }
   build() {
@@ -173,18 +177,42 @@ struct ToastPage {
                   duration: 0,
                   forbidClick: true,
                   message: '倒计时 3 秒'
-                }, this.message)
+                })
                 let second = 3
                 const timer = setInterval(() => {
                   second--
                   if (second) {
-                    this.message.message = `倒计时 ${second} 秒`
+                    toast.setMessage!(`倒计时 ${second} 秒`)
                   } else {
                   clearInterval(timer)
                     SilkToast.closeToast()
                   }
                 }, 1000)
               })
+          }
+          Title('使用 Toast 组件')
+          SilkCellGroup({
+            inset: true
+          }) {
+            SilkCell({
+              props: {
+                title: '使用 Toast 组件',
+                isLink: true
+              }
+            })
+              .onClick(() => {
+                this.show = true
+              })
+          }
+          SilkToastComponent({
+            show: this.show,
+            style: {
+              padding: 0
+            }
+          }) {
+        Image('https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg')
+          .width(200)
+          .height(100)
           }
         }
         .justifyContent(FlexAlign.Start)
