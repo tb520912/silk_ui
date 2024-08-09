@@ -11,7 +11,7 @@ export default struct LoadMoreLayout {
   @Link
   status: LoadMoreStatus
   props?: SilkListProps
-
+  load?: () => Promise<void>
   getImageText(): LoadImageText {
     switch (this.status) {
       case LoadMoreStatus.Inactive:
@@ -38,7 +38,7 @@ export default struct LoadMoreLayout {
         case LoadMoreStatus.ERROR:
           return {
             image: '',
-            text: this.props?.loadTextError || '加载失败'
+            text: this.props?.loadTextError || '请求失败，点击重新加载'
           }
       default:
         return {
@@ -67,6 +67,11 @@ export default struct LoadMoreLayout {
         .alignItems(VerticalAlign.Top)
         .margin({
           top: 10
+        })
+        .onClick(async () => {
+          if (this.status === LoadMoreStatus.ERROR && this.load) {
+            this.load()
+          }
         })
 
       }

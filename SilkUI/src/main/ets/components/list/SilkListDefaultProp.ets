@@ -27,7 +27,7 @@ export interface SilkListProps {
 }
 
 export const SilkListDefaultProp: SilkListProps = {
-  hasRefresh: true, // 是否具有下拉刷新功能
+  hasRefresh: false, // 是否具有下拉刷新功能
   hasLoadMore: true, // 是否具有上拉加载功能
   hasAutoLoad: false, // 是否开启触底自动加载
   maxTranslate: 100, // 可下拉上拉的最大距离
@@ -47,7 +47,7 @@ export const SilkListDefaultProp: SilkListProps = {
   loadTextPullUp1: '上拉可以加载更多', // 上拉1阶段文本
   loadTextPullUp2: '松开立即加载更多', // 上拉2阶段文本
   loadTextDone: '加载完成', // 上拉加载完毕后提示文本
-  loadTextError: '加载失败',
+  loadTextError: '请求失败，点击重新加载',
   loadTextLoading: '正在玩命加载中...', // 上拉加载更多中时的文本
   no_more: '没有更多了',
   lanes: 1, // 列数

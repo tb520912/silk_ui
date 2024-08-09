@@ -5,8 +5,8 @@ export struct SilkTabBar {
   @Link
   @Watch('changeIndex')
   currentIndex: number
-  @ObjectLink
-  silkTabsController: SilkTabsController
+  // @ObjectLink
+  silkTabsController: SilkTabsController = new SilkTabsController()
   @Prop
   list: SilkTabItem[] | SilkTabItemInterface[] = []
   props: SilkTabBarProps = {

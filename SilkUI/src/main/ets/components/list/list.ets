@@ -48,32 +48,32 @@ export struct SilkGridList {
   @BuilderParam
   @Require
   children: (item: object) => void
-  keyGenera: (item: object, index: number) => string = (item: object, index: number) => JSON.stringify(item)
+  keyGenera: (item: object, index: number) => string = (item: object) => JSON.stringify(item)
 
   scroller: Scroller = new Scroller();
   mWidth?: Length = '100%';
   mHeight?: Length = '100%';
-  onRefresh?: () => Promise<void> = () => {
-    return new Promise<void>((resolve, reject) => {
+  refresh?: () => Promise<void> = () => {
+    return new Promise<void>((resolve) => {
       setTimeout(() => {
         resolve();
       }, 1000);
     });
   };
   @Require
-  onLoadMore?: () => Promise<void> = () => {
-    return new Promise<void>((resolve, reject) => {
+  load?: () => Promise<void> = () => {
+    return new Promise<void>((resolve) => {
       setTimeout(() => {
         resolve();
       }, 1000);
     });
   };
-  private async load () {
+  private async loadMore () {
     this.loading = true
     this.loadState = LoadMoreStatus.Loading
     this.trYBottom = 50
-    if (this.onLoadMore) {
-      await this.onLoadMore();
+    if (this.load) {
+      await this.load();
     }
     this.trYBottom = 0
     this.loading = false
@@ -126,6 +126,21 @@ export struct SilkGridList {
     $r('app.media.07')
   ]
   imagesPixelMap: PixelMap[] = []
+
+  // 重新加载
+  async reload (): Promise<void> {
+    if (!this.load) return;
+    try {
+      this.loadState = LoadMoreStatus.Loading
+      this.loading = true
+      await this.load()
+      this.closeLoad()
+    } catch (err) {
+      this.loadState = LoadMoreStatus.ERROR
+    } finally {
+      this.loading = false
+    }
+  }
   aboutToAppear() {
     if (!this.props) {
       this.props = {}
@@ -147,8 +162,8 @@ export struct SilkGridList {
     })
   }
 
+
   build() {
-   Stack({ alignContent: Alignment.Center}){
      Column() {
        // 下拉刷新动画部分
        Stack({ alignContent: Alignment.Bottom}) {
@@ -164,7 +179,7 @@ export struct SilkGridList {
          regularSize: [1,1],
          irregularIndexes: this.irregularIndexes,
        }){
-         LazyForEach(this.listDataSource, (item: object, index: number) => {
+         LazyForEach(this.listDataSource, (item: object) => {
            GridItem() {
              if (this.children) {
                this.children(item)
@@ -179,32 +194,44 @@ export struct SilkGridList {
        // .edgeEffect(EdgeEffect.None)
        .onAreaChange(async (_: Area, area: Area) => {
          const height = Math.round(area.height as number)
-         if (this.refreshStatus === RefreshStatus.Refresh || this.loading || this.finished) return;
+         if ((this.refreshStatus !== RefreshStatus.Inactive && this.refreshStatus !== RefreshStatus.Refresh) || this.loading || this.finished || this.loadState !== LoadMoreStatus.Inactive) return;
+
          if (height < ((this.mHeightNumber || 0) - (this.trYTop || 0) - (Math.abs(this.trYBottom || 0))) && this.scroller.isAtEnd() ) {
            // TODO 内容高度不满一屏时自动加载
            // if (!this.loading && !this.finished && this.refreshStatus === RefreshStatus.Inactive && this.loadState === LoadMoreStatus.Inactive) {
              this.loading = true
             this.loadState = LoadMoreStatus.Loading
            this.trYBottom = 50
-             this.onLoadMore && await this.onLoadMore()
-           this.trYBottom = 0
-           this.loadState = LoadMoreStatus.Inactive
+           try {
+             this.load && await this.load()
+             this.trYBottom = 0
+             this.loadState = LoadMoreStatus.Inactive
              this.loading = false
+           } catch (err) {
+               this.loading = false
+            this.loadState = LoadMoreStatus.ERROR
+             }
+
            // }
          } else if (height === 0 && this.mHeightNumber === 0 ) {
            this.loading = true
            this.loadState = LoadMoreStatus.Loading
            this.trYBottom = 50
-           this.onLoadMore && await this.onLoadMore()
-           this.trYBottom = 0
-           this.loadState = LoadMoreStatus.Inactive
-           this.loading = false
+           try {
+             this.load && await this.load()
+             this.trYBottom = 0
+             this.loadState = LoadMoreStatus.Inactive
+             this.loading = false
+           } catch (err) {
+             this.loading = false
+             this.loadState = LoadMoreStatus.ERROR
+           }
          }
        })
        .onReachEnd(async () => {
          if (!this.finished &&!this.loading && (this.props && this.props.hasAutoLoad) && this.refreshStatus !== RefreshStatus.Refresh) {
            this.reachState = true
-           this.load()
+           this.loadMore()
          }
        })
        .constraintSize({
@@ -221,7 +248,7 @@ export struct SilkGridList {
      }
      .width(this.mWidth === undefined ? '100%' : this.mWidth)
      .height(this.mHeight === undefined ? '100%' : this.mHeight)
-     .onAreaChange((oldValue: Area, newValue: Area) => {
+     .onAreaChange((_: Area, newValue: Area) => {
        this.mWidthNumber = Math.round(newValue.width as number);
        this.mHeightNumber = Math.round(newValue.height as number);
      })
@@ -241,12 +268,6 @@ export struct SilkGridList {
            this.onActionEnd();
          })
      )
-     Text(this.trYBottom + '--111' + this.finished)
-       .fontColor(Color.Red)
-
-   }
-   .width('100%')
-    .height('100%')
   }
   @Builder
   private headerUI() {
@@ -282,7 +303,7 @@ export struct SilkGridList {
       .height('100%')
       .visibility((this.loadState !== LoadMoreStatus.Inactive ) ? Visibility.Visible : Visibility.Hidden)
     } else {
-      LoadMoreLayout({ status: this.loadState, props: this.props! })
+      LoadMoreLayout({ status: this.loadState, props: this.props!, load: () => this.reload() })
     }
   }
 
@@ -431,8 +452,8 @@ export struct SilkGridList {
                     this.onAnimRefreshing(this.value, this.mWidthNumber, this.trYTop);
                   }
                 }, 10);
-                if (this.onRefresh !== undefined) {
-                  this.onRefresh().then((refreshText) => {
+                if (this.refresh !== undefined) {
+                  this.refresh().then(() => {
                       this.refreshStatus = RefreshStatus.Done
                       setTimeout(() => {
                         this.closeRefresh();
@@ -455,7 +476,7 @@ export struct SilkGridList {
                 this.loadState = LoadMoreStatus.Loading;
                 this.trYBottom = -maxTranslate * 0.75;
 
-                if (this.onLoadMore !== undefined && !this.finished) {
+                if (this.load !== undefined && !this.finished) {
                   clearInterval(this.timer);
                   this.timer = setInterval(() => {
                     if (this.value !== undefined) {
@@ -475,12 +496,11 @@ export struct SilkGridList {
                       }
                     }
                   }, 10);
-                  this.onLoadMore().then((loadText) => {
+                  this.load().then(() => {
                     this.loadState = LoadMoreStatus.Done;
                     this.closeLoad();
                   }).catch(() => {
                     this.loadState = LoadMoreStatus.ERROR;
-                    this.closeLoad()
                   });
                 }
               }
