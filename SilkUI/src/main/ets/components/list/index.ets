@@ -199,9 +199,7 @@ export struct SilkList {
           }
           .alignListItem(ListItemAlign.Center)
           .width('100%')
-          .constraintSize({
-            maxHeight: '100%'
-          })
+          .height('100%')
           .backgroundColor(this.background_color || $r('app.color.white'))
           .lanes(this.lanes, this.gutters)
           .padding({
