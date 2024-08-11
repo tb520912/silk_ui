@@ -78,6 +78,9 @@ export default struct LoadMoreLayout {
       .clip(true)
       .width('100%')
       .height('100%')
+    } else {
+      Column().height(0)
+
     }
   }
 }

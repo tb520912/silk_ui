@@ -8,7 +8,8 @@ export struct SilkTabBar {
   // @ObjectLink
   silkTabsController: SilkTabsController = new SilkTabsController()
   @Prop
-  list: SilkTabItem[] | SilkTabItemInterface[] = []
+  @Watch('updateList')
+  list: SilkTabItem[] | SilkTabItemInterface[] | object[] = []
   props: SilkTabBarProps = {
     height: 40
   }
@@ -29,6 +30,16 @@ export struct SilkTabBar {
   RightBuilder: () => void
   @BuilderParam
   TabBar: (item: SilkTabBarInterface) => void
+  tabClick?: ($$: SilkTabBarInterface, event: ClickEvent) => void
+
+  updateList() {
+    // this.tabItemWidth = []
+    // this.tabItemLeft = []
+    // this.silkTabsController.setTabItemWidth(this.tabItemWidth)
+    // this.silkTabsController.setTabItemLeft(this.tabItemLeft)
+    this.silkTabsController.setTabItemLength(this.list.length)
+
+  }
 
   aboutToAppear(): void {
     if (this.props.indicator?.width) {
@@ -73,7 +84,7 @@ export struct SilkTabBar {
               Column() {
                 if (this.TabBar) {
                   this.TabBar({ item: item, index: index })
-                } else {
+                } else if (item instanceof SilkTabItem || this.getItemIsSilkTabItem(item)) {
                   Text(item.title)
                     .fontSize(16)
                     .fontColor(this.currentIndex === index ?
@@ -91,12 +102,23 @@ export struct SilkTabBar {
                 }
               }
               .visibility((item instanceof SilkTabItem && !item.show) ? Visibility.None : Visibility.Visible)
-              .onClick(() => {
+              .onClick((event) => {
                 this.currentIndex = index
+                if (this.tabClick) {
+                  this.tabClick({
+                    item,
+                    index
+                  }, event)
+                }
               })
               .onAreaChange((oldV: Area, newV: Area) => {
-                this.tabItemWidth[index] = newV.width as number
-                this.tabItemLeft[index] = newV.position.x as number
+                if (this.tabItemWidth[index]) {
+                  this.tabItemWidth.splice(index, 1, newV.width as number)
+                  this.tabItemLeft.splice(index, 1, newV.position.x as number)
+                } else {
+                  this.tabItemWidth[index] = newV.width as number
+                  this.tabItemLeft[index] = newV.position.x as number
+                }
               })
               .attributeModifier(this.silkTabsController.getModifier())
 
@@ -124,7 +146,7 @@ export struct SilkTabBar {
                   left: { anchor: 'bar_row', align: HorizontalAlign.Start }
                 })
                 .offset({
-                  x: this.indicatorData.left
+                  x: this.indicatorData.left || 0
                 })
                 .animation({
                   duration: this.silkTabsController.getDuration(),
@@ -135,7 +157,7 @@ export struct SilkTabBar {
             } else if (this.silkTabsController.getTabStyle() === SilkTabStyle.BACKGROUND) {
               Row()
                 .width(this.indicatorData.width)
-                .height('100%')
+                .height(this.getBarHeight())
                 .borderRadius(this.props.indicator?.radius)
                 .backgroundColor(this.props.indicator?.color)
                 .border({
@@ -145,7 +167,7 @@ export struct SilkTabBar {
                 })
                 .id('bar_bg')
                 .alignRules({
-                  bottom: { anchor: '__container__', align: VerticalAlign.Bottom },
+                  center: { anchor: '__container__', align: VerticalAlign.Center },
                   left: { anchor: 'bar_row', align: HorizontalAlign.Start }
                 })
                 .offset({
@@ -171,17 +193,8 @@ export struct SilkTabBar {
       .height(this.props.height)
       .scrollable(ScrollDirection.Horizontal)
       .scrollBar(BarState.Off)
-      .onAreaChange((_, area) => {
-        this.silkTabsController.setBarSize({
-          width: area.width as number,
-          height: area.height as number
-        })
-      })
       .id('bar_container')
-      .alignRules({
-        center: { anchor: '__container__', align: VerticalAlign.Center },
-        middle: { anchor: '__container__', align: HorizontalAlign.Center }
-      })
+      .alignRules(this.getAlignRule())
       .align(this.getBarAlign())
 
       if (this.RightBuilder) {
@@ -199,6 +212,66 @@ export struct SilkTabBar {
     }
     .width('100%')
     .height('100%')
+    .onAreaChange((_, area) => {
+      this.silkTabsController.setBarSize({
+        width: area.width as number,
+        height: area.height as number
+      })
+    })
+  }
+
+  getAlignRule(): AlignRuleOption {
+    if (!!this.LeftBuilder && !this.RightBuilder && this.props.flexStyle === 'right') {
+      return {
+        center: { anchor: '__container__', align: VerticalAlign.Center },
+        right: { anchor: '__container__', align: HorizontalAlign.End },
+      }
+    } else if (!this.LeftBuilder && !!this.RightBuilder && this.props.flexStyle === 'left') {
+      return {
+        center: { anchor: '__container__', align: VerticalAlign.Center },
+        left: { anchor: '__container__', align: HorizontalAlign.Start },
+      }
+    } else {
+      return {
+        center: { anchor: '__container__', align: VerticalAlign.Center },
+        middle: { anchor: '__container__', align: HorizontalAlign.Center }
+      }
+    }
+  }
+
+  // 获取背景高度
+  getBarHeight(): Length {
+    if (this.props.rowPadding) {
+      if (typeof this.props.rowPadding === 'number') {
+        return `calc(100% - ${2 * this.props.rowPadding}vp)`
+      } else {
+        let top: Length = 0
+        let bottom: Length = 0
+        if ((this.props.rowPadding as Padding).top) {
+          top = (typeof this.props.rowPadding.top === 'number' ? this.props.rowPadding.top + 'vp' :
+          this.props.rowPadding.top)!
+        }
+        if ((this.props.rowPadding as Padding).bottom) {
+          bottom = (typeof this.props.rowPadding.bottom === 'number' ? this.props.rowPadding.bottom + 'vp' :
+          this.props.rowPadding.bottom)!
+        }
+        return `calc(100% - ${top} - ${bottom})`
+      }
+    } else {
+      return '100%'
+    }
+  }
+
+  // 判断item类型
+  getItemIsSilkTabItem(item: object): boolean {
+    const arr = Object.keys(item)
+    const defaultKey: string[] = ['id', 'title', 'icon', 'show', 'visible']
+    if (arr.length > defaultKey.length) {
+      return false
+    } else {
+      // 判断arr中是否存在defaultArr中没有的元素
+      return defaultKey.some(v =>!arr.includes(v))
+    }
   }
 
   changeIndex() {
@@ -206,19 +279,28 @@ export struct SilkTabBar {
   }
 
   initActive() {
-    this.silkTabsController.initActive()
+    const l1 = this.list.length
+    const l2 = this.tabItemWidth.filter(item => item !== undefined || item !== null).length
+    const l3 = this.tabItemLeft.filter(item => item !== undefined || item !== null).length
+    if (l1 <= l2 && l2 === l3) {
+      this.silkTabsController.initActive()
+    }
   }
 
   // 设置tabbaritem的水平对齐方式
   getAlign() {
     if (!this.silkTabsController.getIsScroll()) {
-      switch (this.props.flexStyle) {
-        case 'left':
-          return FlexAlign.Start
-        case 'right':
-          return FlexAlign.End
-        default:
-          return FlexAlign.Center
+      if (this.props.spaceArround) {
+        return FlexAlign.SpaceAround
+      } else {
+        switch (this.props.flexStyle) {
+          case 'left':
+            return FlexAlign.Start
+          case 'right':
+            return FlexAlign.End
+          default:
+            return FlexAlign.Center
+        }
       }
     } else {
       return FlexAlign.Start
@@ -270,7 +352,7 @@ export interface SilkTabBarIndicator {
 }
 
 export interface SilkTabBarInterface {
-  item: SilkTabItem
+  item: SilkTabItemInterface | object
   index: number
 }
 

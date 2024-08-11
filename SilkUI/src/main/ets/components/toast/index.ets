@@ -1,6 +1,7 @@
 import { Context } from '@kit.AbilityKit'
 import { ObjectUtils } from '../../utils/ObjectUtils'
 import { SilkLoading } from '../loading'
+import { util } from '@kit.ArkTS'
 
 export enum SilkToastType {
   WARN = 'warn',
@@ -9,12 +10,14 @@ export enum SilkToastType {
   TOAST = 'toast',
   LOADING = 'loading'
 }
+
 interface SilkToastStyle {
   padding?: Padding | number
   backgroundColor?: ResourceColor
   radius?: Length,
   fillColor?: ResourceColor
 }
+
 interface SilkToastProps {
   message?: ResourceStr
   duration?: number
@@ -38,6 +41,7 @@ interface SilkToastProps {
 class ToastDynamicController {
   setMessage?: (message: ResourceStr) => void
 }
+
 let controller: CustomDialogController | null
 let DEFAULT_PROP: SilkToastProps = {
   message: '',
@@ -89,12 +93,20 @@ let CONSTRAINT_SIZE_IMAGE: ConstraintSizeOptions = {
 }
 // 单例模式
 let isSingleton: boolean = true
+const controllerMap: Map<string, CustomDialogController> = new Map()
+
 @Component
 struct ToastDialog {
   _mounted(props: SilkToastProps, type: SilkToastType, toastController?: ToastDynamicController) {
-    const prop = ObjectUtils.assign(DEFAULT_PROP, props, {toastType:type})
-    if (controller && isSingleton) {
-      controller.close()
+    const id = util.generateRandomUUID()
+    const prop = ObjectUtils.assign(DEFAULT_PROP, props, { toastType: type })
+    const cont = controllerMap.size
+    if (cont && isSingleton) {
+      // controller.close()
+      controllerMap.forEach(item => {
+        item.close()
+      })
+      controllerMap.clear()
       controller = null
     }
     controller = new CustomDialogController({
@@ -110,7 +122,9 @@ struct ToastDialog {
         duration: prop.duration,
         toastController: toastController,
         onOpened: prop.onOpened,
-        onClose: prop.onClose
+        onClose: prop.onClose,
+        closeOnClick: prop.closeOnClick,
+        _id: id
       }),
       customStyle: true,
       autoCancel: this.getAutoCancel(prop),
@@ -121,12 +135,13 @@ struct ToastDialog {
       },
       isModal: prop.overlay
     })
+    controllerMap.set(id, controller)
     controller.open()
     if (prop.duration === 0) {
 
     } else {
       setTimeout(() => {
-        controller?.close()
+        controllerMap.get(id)?.close()
       }, prop.duration ?? type === SilkToastType.ERROR ? 30000 : 3000)
     }
   }
@@ -153,10 +168,14 @@ struct ToastDialog {
 
   error(props: SilkToastProps | ResourceStr) {
     if (Object.keys(props).includes('message')) {
+      if ((props as SilkToastProps).closeOnClick === undefined) {
+        (props as SilkToastProps).closeOnClick = true
+      }
       this._mounted(props as SilkToastProps, SilkToastType.ERROR)
     } else {
       this._mounted({
-        message: props as ResourceStr
+        message: props as ResourceStr,
+        closeOnClick: true
       }, SilkToastType.ERROR)
     }
   }
@@ -173,10 +192,15 @@ struct ToastDialog {
 
   warn(props: SilkToastProps | ResourceStr) {
     if (Object.keys(props).includes('message')) {
+      if ((props as SilkToastProps).closeOnClick === undefined) {
+        (props as SilkToastProps).closeOnClick = true
+      }
       this._mounted(props as SilkToastProps, SilkToastType.WARN)
     } else {
       this._mounted({
-        message: props as ResourceStr
+        message: props as ResourceStr,
+        closeOnClick: true
+
       }, SilkToastType.WARN)
     }
   }
@@ -190,6 +214,7 @@ struct ToastDialog {
       }, SilkToastType.LOADING, controller)
     }
   }
+
   getAlign(showPosition: 'top' | 'center' | 'bottom'): DialogAlignment {
     switch (showPosition) {
       case 'top':
@@ -200,7 +225,8 @@ struct ToastDialog {
         return DialogAlignment.Bottom
     }
   }
-  getAutoCancel (props: SilkToastProps): boolean {
+
+  getAutoCancel(props: SilkToastProps): boolean {
     if (props?.forbidClick) {
       return false
     } else {
@@ -218,6 +244,7 @@ struct ToastDialog {
 
 @CustomDialog
 struct CusDialog {
+  _id?: string
   @State
   toastController: ToastDynamicController = new ToastDynamicController()
   controller: CustomDialogController
@@ -237,6 +264,7 @@ struct CusDialog {
   children: () => void
   onClose?: Function
   onOpened?: Function
+
   getImage(): ResourceStr {
     if (this.icon) {
       return this.icon
@@ -273,7 +301,7 @@ struct CusDialog {
             .fillColor(this.style?.fillColor || DEFAULT_STYLE.fillColor)
         }
         if (this.type === SilkToastType.LOADING) {
-          Row(){
+          Row() {
             SilkLoading({
               color: this.style?.fillColor || DEFAULT_STYLE.fillColor,
               sizeValue: this.loadingSize,
@@ -294,7 +322,7 @@ struct CusDialog {
         ?
       this.style.padding
         :
-        ((this.showIcon && this.getImage()) || this.type === SilkToastType.LOADING )
+        ((this.showIcon && this.getImage()) || this.type === SilkToastType.LOADING)
           ?
           DEFAULT_IMAGE_PADDING
           :
@@ -306,13 +334,17 @@ struct CusDialog {
     .constraintSize(
       (this.showIcon && this.getImage())
         ?
-      CONSTRAINT_SIZE_IMAGE
+        CONSTRAINT_SIZE_IMAGE
         :
         CONSTRAINT_SIZE_TEXT
     )
     .onClick(() => {
       if (this.closeOnClick) {
-        this.controller.close()
+        if (this._id) {
+          controllerMap.get(this._id)?.close()
+        } else {
+          this.controller.close()
+        }
       }
     })
     .onAppear(() => {
@@ -326,11 +358,11 @@ struct CusDialog {
       }
     })
   }
-
 }
 
 class ToastClass {
   static ToastComponent: ToastDialog | null = null
+
   static init(context?: Context) {
     if (!getContext() && !context) {
       return;
@@ -369,6 +401,7 @@ export class SilkToast {
     }
     ToastClass.ToastComponent?.warn(props)
   }
+
   static loading(props: SilkToastProps | ResourceStr): ToastDynamicController {
     const controller: ToastDynamicController = new ToastDynamicController()
     if (!ToastClass.ToastComponent || !inited) {
@@ -377,8 +410,16 @@ export class SilkToast {
     ToastClass.ToastComponent!.loading(props, controller)
     return controller
   }
-  static closeToast () {
-    controller?.close()
+
+  static closeToast() {
+    if (controllerMap.size) {
+      controllerMap.forEach(item => {
+        item.close()
+      })
+      controllerMap.clear()
+    } else {
+      controller?.close()
+    }
   }
 
   static init(context?: Context) {
@@ -396,11 +437,11 @@ export struct SilkToastComponent {
     message: ''
   }
   style?: SilkToastStyle
-
   controller?: CustomDialogController
   @BuilderParam
   children: () => void
-  update () {
+
+  update() {
     if (this.show) {
       this.controller?.open()
       setTimeout(() => {
@@ -412,8 +453,9 @@ export struct SilkToastComponent {
       this.show = false
     }
   }
+
   aboutToAppear(): void {
-    this.props = ObjectUtils.assign(DEFAULT_PROP, this.props || {message: ''})
+    this.props = ObjectUtils.assign(DEFAULT_PROP, this.props || { message: '' })
     this.controller = new CustomDialogController({
       builder: CusDialog({
         message: this.props.message,
@@ -433,12 +475,14 @@ export struct SilkToastComponent {
       autoCancel: this.getAutoCancel(),
       alignment: (() => this.getAlign(this.props.showPosition!))(),
       offset: {
-        dy: this.props.showPosition === 'top' ? this.props.offset! : this.props.showPosition === 'bottom' ? `-${this.props.offset}` : 0,
+        dy: this.props.showPosition === 'top' ? this.props.offset! :
+          this.props.showPosition === 'bottom' ? `-${this.props.offset}` : 0,
         dx: 0
       },
       isModal: this.props.overlay
     })
   }
+
   build() {
 
   }
@@ -453,7 +497,8 @@ export struct SilkToastComponent {
         return DialogAlignment.Bottom
     }
   }
-  getAutoCancel (): boolean {
+
+  getAutoCancel(): boolean {
     if (this.props?.forbidClick) {
       return false
     } else {
@@ -465,6 +510,7 @@ export struct SilkToastComponent {
     }
   }
 }
+
 // 切换非单例模式
 export const allowMultipleToast = (flag?: boolean) => {
   if (flag === undefined || flag) {
@@ -473,6 +519,7 @@ export const allowMultipleToast = (flag?: boolean) => {
     isSingleton = true
   }
 }
+
 // 修改默认配置
 /**
  * style中的padding属性优先级高于text_padding/omage_padding
@@ -492,6 +539,7 @@ export const setToastDefaultOptions = (
   constraint_size_text && (CONSTRAINT_SIZE_TEXT = ObjectUtils.assign(CONSTRAINT_SIZE_TEXT, constraint_size_text))
   constraint_size_image && (CONSTRAINT_SIZE_IMAGE = ObjectUtils.assign(CONSTRAINT_SIZE_IMAGE, constraint_size_image))
 }
+
 // 重置默认
 export const resetToastDefaultOptions = () => {
   DEFAULT_PROP = {
