@@ -70,6 +70,7 @@ export struct SilkTabBar {
           }
         }
         .width(this.props.marginLeft)
+        .justifyContent(FlexAlign.Center)
         .height('100%')
         .id('bar_left')
         .alignRules({
@@ -189,7 +190,7 @@ export struct SilkTabBar {
         .borderRadius(this.props.radius ? this.props.radius : 0)
         .backgroundColor(this.props.bgColor ? this.props.bgColor : Color.White)
       }
-      .width('calc(100% - ' + this.props.iconWidth + 'vp)')
+      .width(`calc(100% - ${this.props.marginLeft ? typeof this.props.marginLeft === 'number' ? this.props.marginLeft + 'vp' : this.props.marginLeft : '0vp'} - ${this.props.marginRight ? typeof this.props.marginRight === 'number' ? this.props.marginRight + 'vp' : this.props.marginRight : '0vp'})`)
       .height(this.props.height)
       .scrollable(ScrollDirection.Horizontal)
       .scrollBar(BarState.Off)
@@ -202,6 +203,7 @@ export struct SilkTabBar {
           this.RightBuilder()
         }
         .width(this.props.marginRight)
+        .justifyContent(FlexAlign.Center)
         .height('100%')
         .id('bar_right')
         .alignRules({
@@ -325,7 +327,6 @@ export interface SilkTabBarProps {
   spaceArround?: boolean // 是否均分 默认在不滚动时均分
   height: Length
   width?: Length
-  iconWidth?: Length
   marginLeft?: Length
   marginRight?: Length
   fontSize?: number
