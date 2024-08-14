@@ -6,7 +6,7 @@ import { SilkListDefaultProp, SilkListProps } from './SilkListDefaultProp';
 import { ObjectUtils } from '../../utils/ObjectUtils';
 import { ValueAnimator } from '../../utils/ValueAnimator';
 import { RefreshStatus } from './RefreshLayout'
-
+import fs from '@ohos.file.fs'
 // 列表分割线
 export interface ListDivider {
   strokeWidth: Length,
@@ -117,14 +117,23 @@ export struct SilkList {
   private animatorStatus: boolean = false
   private RefreshCurrentIndex: number = 0
   props?: SilkListProps
-  images: Resource[] = [
-    $r('app.media.01'),
-    $r('app.media.02'),
-    $r('app.media.03'),
-    $r('app.media.04'),
-    $r('app.media.05'),
-    $r('app.media.06'),
-    $r('app.media.07')
+  // images: Resource[] = [
+  //   $r('app.media.01'),
+  //   $r('app.media.02'),
+  //   $r('app.media.03'),
+  //   $r('app.media.04'),
+  //   $r('app.media.05'),
+  //   $r('app.media.06'),
+  //   $r('app.media.07')
+  // ]
+  private images: string[] = [
+    "01.png",
+    "02.png",
+    "03.png",
+    "04.png",
+    "05.png",
+    "06.png",
+    "07.png"
   ]
   imagesPixelMap: PixelMap[] = []
 
@@ -160,11 +169,13 @@ export struct SilkList {
       this.animator.fillRule = 1
       this.animator.onUpdate = (value: number) => this.updateAnimator(value)
     }
-    this.imagesPixelMap = this.images.map((item) => {
-      const buffer = getContext().resourceManager.getMediaContentSync(item.id)
-      const imageSource = image.createImageSource(buffer.buffer)
-      return imageSource.createPixelMapSync()
-    })
+    if (!this.imagesPixelMap.length) {
+      this.imagesPixelMap = this.images.map((item) => {
+        const fd = getContext().resourceManager.getRawFdSync(item)
+        const imageSource = image.createImageSource(fd)
+        return imageSource.createPixelMapSync()
+      })
+    }
   }
 
   build() {
