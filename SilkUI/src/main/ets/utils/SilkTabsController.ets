@@ -106,7 +106,7 @@ export class SilkTabsController {
       return;
     }
     const arr = this._tabItemWidth.filter((item: number) => item !== null && item !== undefined)
-    if (arr.length === this._tabItemLength) {
+    if (arr.length >= this._tabItemLength) {
       this.isScroll = this._tabItemWidth.reduce((pre: number, next: number) => pre + next, 0) > this._barSize.width
       if (!this.isScroll && this._spaceArround) {
         this.myColumn.spaceArround = true
@@ -225,6 +225,7 @@ export class SilkTabsController {
 
   // 监听激活项的变化 将激活项移到滚动容器中央的位置，并设置最终的偏移量
   changeIndex(currentIndex: number) {
+    this._initIndex = currentIndex
     // 如果当前item被隐藏了 则需露出
     if (currentIndex === 0) {
       this._scrollController?.scrollEdge(Edge.Start)

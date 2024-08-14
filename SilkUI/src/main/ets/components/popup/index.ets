@@ -128,7 +128,7 @@ export struct SilkPopup {
         this.getUIContext().getUIObserver().on('navDestinationUpdate', () => this.callback())
       }
     } else {
-      // this.closeHandler()
+      this.closeHandler()
       if (this.close_on_pop_state) {
         // 页面变化时关闭弹框
         this.getUIContext().getUIObserver().off('navDestinationUpdate', () => this.callback())

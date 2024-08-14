@@ -5,13 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "/Users/tianbin/.ohos/config/default_UiComponent_nNwZ6_MW39Tf3GetdewRI95bdB01555mHca7soWoKvg=.cer",
-          "storePassword": "0000001BC5582DE87C06F01027EA763FD7BC70B66ADE96EA458D995F241FF4F3EE40B38EFCB57ACDB4E449",
+          "certpath": "/Users/tb09/.ohos/config/default_uicomponent_kWWCBCwmbi764lmGyMNU_rE0fgLTKLdFacsSars58l8=.cer",
+          "storePassword": "0000001BC233670B6C00B9576EAB5A4A1BA478A1A2E6E0923EDB9E554BFAFF6C98872BE5AA48617FAF746C",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001B560EF99D201D937AA89E75254C11D201AF74180DB9B1270A21B2650DB73D69261649A3F781620D",
-          "profile": "/Users/tianbin/.ohos/config/default_UiComponent_nNwZ6_MW39Tf3GetdewRI95bdB01555mHca7soWoKvg=.p7b",
+          "keyPassword": "0000001BB0420806FE7BAEF97A9F9B2E29CD09D08B9731A8F918A5FDF6B63AFE01194E5CE60CC40515FE05",
+          "profile": "/Users/tb09/.ohos/config/default_uicomponent_kWWCBCwmbi764lmGyMNU_rE0fgLTKLdFacsSars58l8=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/tianbin/.ohos/config/default_UiComponent_nNwZ6_MW39Tf3GetdewRI95bdB01555mHca7soWoKvg=.p12"
+          "storeFile": "/Users/tb09/.ohos/config/default_uicomponent_kWWCBCwmbi764lmGyMNU_rE0fgLTKLdFacsSars58l8=.p12"
         }
       }
     ],
@@ -19,7 +19,7 @@
       {
         "name": "default",
         "signingConfig": "default",
-        "compatibleSdkVersion": "4.1.0(11)",
+        "compatibleSdkVersion": "5.0.0(12)",
         "runtimeOS": "HarmonyOS",
       }
     ],

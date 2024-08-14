@@ -245,8 +245,8 @@ export struct SilkTabBar {
       if (typeof this.props.rowPadding === 'number') {
         return `calc(100% - ${2 * this.props.rowPadding}vp)`
       } else {
-        let top: Length = 0
-        let bottom: Length = 0
+        let top: Length = '0vp'
+        let bottom: Length = '0vp'
         if ((this.props.rowPadding as Padding).top) {
           top = (typeof this.props.rowPadding.top === 'number' ? this.props.rowPadding.top + 'vp' :
           this.props.rowPadding.top)!
