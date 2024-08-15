@@ -7,6 +7,8 @@ import { ObjectUtils } from '../../utils/ObjectUtils';
 import { ValueAnimator } from '../../utils/ValueAnimator';
 import { RefreshStatus } from './RefreshLayout'
 import fs from '@ohos.file.fs'
+import { HashMap } from '@kit.ArkTS';
+
 // 列表分割线
 export interface ListDivider {
   strokeWidth: Length,
@@ -14,6 +16,7 @@ export interface ListDivider {
   startMargin?: Length,
   endMargin?: Length
 }
+const DEFAULT_GROUP_KEY = 'children'
 
 @Preview
 @Component
@@ -42,8 +45,22 @@ export struct SilkList {
   dataSource: object[] = []
   // 懒加载
   listDataSource: LazyDataSource<object> = new LazyDataSource<object>()
+  hashDataSource: HashMap<string, LazyDataSource<object>> = new HashMap()
   updateDataSource() {
     this.listDataSource.pushArrayData(this.dataSource)
+    // 处理嵌套分组的情况
+    if (this.GroupHeader || this.GroupFooter || this.groupKey) {
+      this.dataSource.forEach((item, index) => {
+        const key = this.groupKey || DEFAULT_GROUP_KEY
+        if (Object.keys(item).includes(key)) {
+          if (Array.isArray(item[key])) {
+            const lazyData = new LazyDataSource<object>()
+            lazyData.pushArrayData(item[key])
+            this.hashDataSource.set(item[this.groupTitle || index + ''], lazyData)
+          }
+        }
+      })
+    }
   }
   // 子元素
   @BuilderParam
@@ -51,6 +68,15 @@ export struct SilkList {
   children: (item: object) => void
   keyGenera: (item: object, index: number) => string = (item: object) => JSON.stringify(item)
 
+  // 列表分组
+  groupType?: 'header' | 'footer' // 分组标题类型
+  groupStack?: boolean // 分组是否需要固定
+  groupTitle?: string // 分组需要展示的标题
+  groupKey?: string // 是否需要分组 需要为true 且children需要传递group 接受嵌套时数组的键值 默认children
+  @BuilderParam
+  GroupHeader?: (item: object) => void
+  @BuilderParam
+  GroupFooter?: (item: object) => void
   scroller: Scroller = new Scroller();
   mWidth?: Length = '100%';
   mHeight?: Length = '100%';
@@ -176,6 +202,8 @@ export struct SilkList {
         return imageSource.createPixelMapSync()
       })
     }
+
+
   }
 
   build() {
@@ -196,12 +224,23 @@ export struct SilkList {
             }
           }
           LazyForEach(this.listDataSource, (item: object, index: number) => {
-            ListItem() {
-              if (this.children) {
-                this.children(item)
+            if (this.groupType) {
+              ListItemGroup({
+                header: this.groupType === 'header' ? this.GroupHeader ? this.GroupHeader(item) : this.groupComp(this.groupTitle ? item[this.groupTitle] : index + '') : undefined,
+                footer: this.groupType === 'footer' ? this.GroupFooter ? this.GroupFooter(item) : this.groupComp(this.groupTitle ? item[this.groupTitle] : index + '') : undefined}) {
+                LazyForEach(this.hashDataSource.get(this.groupTitle ? item[this.groupTitle] : index + ''),  (sItem: object) => {
+                  this.children(sItem)
+                }, this.keyGenera)
+
               }
+            } else {
+              ListItem() {
+                if (this.children) {
+                  this.children(item)
+                }
+              }
+              .backgroundColor($r('app.color.white'))
             }
-            .backgroundColor($r('app.color.white'))
           }, this.keyGenera)
         }
         .divider(this.divider)
@@ -258,7 +297,7 @@ export struct SilkList {
         }
       })
       .onReachEnd(async () => {
-        if (!this.finished &&!this.loading && (this.props && this.props.hasAutoLoad) && this.refreshStatus !== RefreshStatus.Refresh) {
+        if (!this.finished &&!this.loading && (this.props && this.props.hasAutoLoad) && this.refreshStatus !== RefreshStatus.Refresh && this.loadState === LoadMoreStatus.Inactive) {
           this.reachState = true
           this.loadMore()
         }
@@ -336,6 +375,20 @@ export struct SilkList {
     } else {
       LoadMoreLayout({ status: this.loadState, props: this.props!, load: () => this.reload() })
     }
+  }
+
+  @Builder
+  private groupComp (title: string) {
+    Text(title)
+      .fontSize(16)
+      .fontColor($r('app.color.base_font_color3'))
+      .fontWeight(500)
+      .width('100%')
+      .textAlign(TextAlign.Start)
+      .padding({
+        top: 16,
+        bottom: 16
+      })
   }
 
   private onActionUpdate(event: GestureEvent): void {

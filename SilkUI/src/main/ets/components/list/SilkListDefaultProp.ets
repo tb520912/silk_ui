@@ -29,7 +29,7 @@ export interface SilkListProps {
 export const SilkListDefaultProp: SilkListProps = {
   hasRefresh: false, // 是否具有下拉刷新功能
   hasLoadMore: true, // 是否具有上拉加载功能
-  hasAutoLoad: false, // 是否开启触底自动加载
+  hasAutoLoad: true, // 是否开启触底自动加载
   maxTranslate: 100, // 可下拉上拉的最大距离
   sensitivity: 0.7, // 下拉上拉灵敏度
   listIsPlacement: true, // 滑动结束后列表是否归位
