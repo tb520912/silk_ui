@@ -15,7 +15,7 @@
 export class PullToRefreshConfigurator {
   private hasRefresh?: boolean = true; // 是否具有下拉刷新功能
   private hasLoadMore?: boolean = true; // 是否具有上拉加载功能
-  private hasAutoLoad?: boolean = false;
+  private hasAutoLoad?: boolean = true;
   private maxTranslate?: number = 100; // 可下拉上拉的最大距离
   private sensitivity?: number = 0.7; // 下拉上拉灵敏度
   private listIsPlacement?: boolean = true; // 滑动结束后列表是否归位
